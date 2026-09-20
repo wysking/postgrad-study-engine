@@ -49,6 +49,7 @@ VARIANT_LEVELS = {"isomorphic", "near_transfer", "boundary", "mixed_transfer"}
 EVIDENCE_TARGETS = {"comprehension", "recall", "independent", "transfer", "delayed", "timed"}
 UNIT_ID_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$")
 EVENT_ID_RE = re.compile(r"^\S+$")
+REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 SHA256_RE = re.compile(r"^[a-fA-F0-9]{64}$")
 
 
@@ -264,8 +265,8 @@ def validate_mobile_request(request: Any) -> dict[str, Any]:
     _require_keys(request, ("schema_version", "request_id", "created_at", "operation", "payload"), "mobile_request")
     if request["schema_version"] != "1.0":
         raise ContractError("mobile_request.schema_version must be '1.0'")
-    if not isinstance(request["request_id"], str) or not EVENT_ID_RE.fullmatch(request["request_id"]):
-        raise ContractError("mobile_request.request_id must be non-empty and contain no whitespace")
+    if not isinstance(request["request_id"], str) or not REQUEST_ID_RE.fullmatch(request["request_id"]):
+        raise ContractError("mobile_request.request_id must be a safe path component up to 128 characters")
     parse_datetime(request["created_at"], "mobile_request.created_at")
     _require_enum(request["operation"], REQUEST_OPERATIONS, "mobile_request.operation")
     _require_mapping(request["payload"], "mobile_request.payload")
@@ -281,8 +282,8 @@ def validate_mobile_response(response: Any) -> dict[str, Any]:
     _require_keys(response, ("schema_version", "request_id", "operation", "status", "processed_at"), "mobile_response")
     if response["schema_version"] != "1.0":
         raise ContractError("mobile_response.schema_version must be '1.0'")
-    if not isinstance(response["request_id"], str) or not EVENT_ID_RE.fullmatch(response["request_id"]):
-        raise ContractError("mobile_response.request_id must be non-empty and contain no whitespace")
+    if not isinstance(response["request_id"], str) or not REQUEST_ID_RE.fullmatch(response["request_id"]):
+        raise ContractError("mobile_response.request_id must be a safe path component up to 128 characters")
     _require_enum(response["operation"], REQUEST_OPERATIONS, "mobile_response.operation")
     _require_enum(response["status"], RESPONSE_STATUSES, "mobile_response.status")
     parse_datetime(response["processed_at"], "mobile_response.processed_at")

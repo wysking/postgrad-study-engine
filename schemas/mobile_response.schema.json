@@ -7,7 +7,7 @@
   "required": ["schema_version", "request_id", "operation", "status", "processed_at"],
   "properties": {
     "schema_version": {"const": "1.0"},
-    "request_id": {"type": "string", "pattern": "^[^\\s]+$"},
+    "request_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
     "operation": {
       "enum": [
         "record_attempt", "record_diagnosis", "register_unit", "save_session_result",
