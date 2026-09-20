@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "event_id": "demo-20260810-diagnosis-001",
+  "timestamp": "2026-08-10T09:10:00+08:00",
+  "event_type": "diagnosis",
+  "subject": "math",
+  "unit_ids": ["math.calculus.limit.equivalent_substitution"],
+  "diagnosis": {
+    "diagnosis_id": "demo-diagnosis-limit-001",
+    "question_id": "demo-limit-002",
+    "status": "hypothesized",
+    "generated_by": "codex",
+    "confidence": 0.7,
+    "first_divergence": "An additive term was replaced directly.",
+    "root_cause": "The replacement condition may not be stable.",
+    "error_tags": ["condition-check.equivalent-infinitesimal"],
+    "evidence_refs": ["draft:line-3"],
+    "confirmation_method": "not_confirmed",
+    "next_action": "Ask the learner to inspect line 3 and redo the transformation."
+  }
+}

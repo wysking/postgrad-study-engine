@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "unit_id": "math.calculus.limit.equivalent_substitution",
+  "subject": "math",
+  "title": "等价无穷小替换的适用条件",
+  "prerequisites": ["math.calculus.limit.basic_operations"],
+  "evidence_targets": ["comprehension", "independent", "transfer", "delayed", "timed"],
+  "exam_weight": 0.7,
+  "estimated_minutes": 20,
+  "status": "active",
+  "tags": ["condition-check", "limit"]
+}

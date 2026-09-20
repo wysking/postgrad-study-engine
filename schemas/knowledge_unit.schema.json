@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/knowledge_unit.schema.json",
+  "title": "Postgrad Study Engine knowledge unit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "unit_id", "subject", "title"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "unit_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"
+    },
+    "subject": {
+      "enum": ["math", "english", "materials", "politics", "physical_chemistry", "math_contest"]
+    },
+    "title": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "prerequisites": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"}
+    },
+    "transfer_links": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"}
+    },
+    "evidence_targets": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["comprehension", "recall", "independent", "transfer", "delayed", "timed"]
+      }
+    },
+    "exam_weight": {"type": "number", "minimum": 0, "maximum": 1},
+    "estimated_minutes": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["active", "archived"], "default": "active"},
+    "tags": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  }
+}

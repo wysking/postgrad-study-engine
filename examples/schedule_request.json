@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "available_minutes": 90,
+  "as_of": "2026-08-10T09:00:00+08:00",
+  "max_subject_share": 0.67,
+  "phase_subjects": ["math", "english", "materials"],
+  "candidates": [
+    {
+      "task_id": "demo-new-english-reading",
+      "task_type": "learn",
+      "subject": "english",
+      "unit_id": "english.reading.distractor.scope_expansion",
+      "activity": "learn",
+      "estimated_minutes": 30,
+      "expected_score_gain": 0.55,
+      "forgetting_risk": 0.1,
+      "information_gain": 0.8,
+      "transfer_value": 0.7,
+      "urgency": 0.3,
+      "error_recurrence": 0.0,
+      "fatigue_cost": 0.25,
+      "prerequisite_ready": true,
+      "reason": "Demonstration candidate only"
+    }
+  ]
+}

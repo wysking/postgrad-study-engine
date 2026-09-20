@@ -1,0 +1,37 @@
+# Python and local environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local demo and generated output
+state/local/
+state/cache/
+exports/
+*.db
+*.sqlite3
+*.log
+
+# Private learning material must never enter the public Core
+sources/raw/
+sources/private/
+inbox/
+outbox/
+*.pdf
+*.epub
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.heic
+
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+secrets/

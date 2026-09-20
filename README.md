@@ -1,0 +1,33 @@
+# Postgrad Study Engine
+
+Reusable Core for evidence-based study systems. The repository contains:
+
+- versioned data contracts for knowledge units, learning events, diagnoses, schedules, source references, and mobile requests;
+- dependency-free validation, append-only persistence, deterministic state rebuilding, and constrained scheduling;
+- a structured `inbox/<request_id>.json` → `outbox/<request_id>.json` integration for a private Vault;
+- teaching and error-closure protocols, blank templates, fictional examples, tests, and CI.
+
+The Core contains no learner data. A private Vault supplies its own profile, subjects, events, state, schedule configuration, and engine lock at runtime. The Core is checked out at the exact commit recorded by the Vault; changing that lock is a reviewed upgrade, not an automatic production mutation.
+
+## Local verification
+
+```powershell
+python -m unittest discover -s tests -v
+python -m scripts.validate_events
+```
+
+## Runtime integration
+
+From the Core checkout, process all JSON requests in a Vault inbox:
+
+```powershell
+python -m scripts.process_inbox --vault-root C:\path\to\private-vault
+```
+
+Only a response with `status: "succeeded"` means the requested evidence was durably accepted. `pending` is used for project-change requests that still require review; `failed` means no durable archive claim may be made.
+
+## Licensing
+
+- Python code: MIT, see `LICENSE`.
+- Documentation, protocols, schemas, and templates: CC BY 4.0, see `LICENSE-DOCS-CC-BY-4.0`.
+- Third-party textbooks, paid courses, scans, question banks, and other source works are not included or relicensed by this repository.

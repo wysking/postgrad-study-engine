@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/source_reference.schema.json",
+  "title": "Postgrad Study Engine source reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reference_id", "kind", "label"],
+  "properties": {
+    "reference_id": {"type": "string", "pattern": "^[^\\s]+$"},
+    "kind": {"enum": ["book", "question", "image", "official_notice", "other"]},
+    "label": {"type": "string", "minLength": 1},
+    "locator": {"type": "string", "minLength": 1},
+    "edition": {"type": "string", "minLength": 1},
+    "local_path": {"type": "string", "minLength": 1},
+    "source_hash": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+    "notes": {"type": "string", "minLength": 1}
+  }
+}

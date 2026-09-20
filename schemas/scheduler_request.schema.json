@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/scheduler_request.schema.json",
+  "title": "Postgrad Study Engine global scheduling request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "available_minutes", "as_of"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "available_minutes": {"type": "integer", "minimum": 1},
+    "as_of": {"type": "string", "format": "date-time"},
+    "fatigue_budget": {"type": "number", "minimum": 0},
+    "max_subject_share": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+    "phase_subjects": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["math", "english", "materials", "politics", "physical_chemistry", "math_contest"]}
+    },
+    "candidates": {"type": "array", "items": {"type": "object"}}
+  }
+}

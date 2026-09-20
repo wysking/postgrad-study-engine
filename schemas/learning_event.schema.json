@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/learning_event.schema.json",
+  "title": "Postgrad Study Engine append-only learning event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "timestamp", "event_type", "subject", "unit_ids"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "event_id": {"type": "string", "pattern": "^[^\\s]+$"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "event_type": {"enum": ["attempt", "diagnosis"]},
+    "subject": {
+      "enum": ["math", "english", "materials", "politics", "physical_chemistry", "math_contest"]
+    },
+    "unit_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"}
+    },
+    "activity": {"enum": ["learn", "recall", "solve", "review", "timed_practice", "explain", "variant"]},
+    "source_ref": {"type": "string", "minLength": 1},
+    "source_hash": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+    "transcription": {"type": "string"},
+    "transcription_uncertainty": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question_id", "result", "answer_mode", "process_check", "assistance_level"],
+      "properties": {
+        "question_id": {"type": "string", "minLength": 1},
+        "result": {"enum": ["correct", "incorrect", "partial", "unanswered"]},
+        "answer_mode": {"enum": ["independent", "guess", "uncertain", "recalled", "assisted"]},
+        "process_check": {"enum": ["clean", "suspicious", "not_available"]},
+        "assistance_level": {"type": "integer", "minimum": 0, "maximum": 5},
+        "time_minutes": {"type": "number", "exclusiveMinimum": 0},
+        "confidence_before": {"type": "number", "minimum": 0, "maximum": 1},
+        "confidence_after": {"type": "number", "minimum": 0, "maximum": 1},
+        "evidence": {"type": "string", "minLength": 1},
+        "variant_level": {"enum": ["isomorphic", "near_transfer", "boundary", "mixed_transfer"]},
+        "parent_diagnosis_id": {"type": "string", "minLength": 1},
+        "delayed_days": {"type": "integer", "minimum": 0}
+      }
+    },
+    "diagnosis": {"$ref": "diagnosis.schema.json"},
+    "next_action": {"type": "string", "minLength": 1},
+    "recommended_review_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"event_type": {"const": "attempt"}}},
+      "then": {"required": ["activity", "attempt"], "not": {"required": ["diagnosis"]}}
+    },
+    {
+      "if": {"properties": {"event_type": {"const": "diagnosis"}}},
+      "then": {"required": ["diagnosis"], "not": {"required": ["attempt"]}}
+    },
+    {
+      "if": {"properties": {"attempt": {"required": ["variant_level"]}}, "required": ["attempt"]},
+      "then": {"properties": {"attempt": {"required": ["parent_diagnosis_id"]}}}
+    }
+  ]
+}

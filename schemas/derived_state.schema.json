@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/derived_state.schema.json",
+  "title": "Postgrad Study Engine rebuildable state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "model_version", "generated_at", "event_count", "units", "diagnoses", "error_patterns", "review_queue"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "model_version": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "event_count": {"type": "integer", "minimum": 0},
+    "units": {"type": "object", "additionalProperties": {"type": "object"}},
+    "diagnoses": {"type": "object", "additionalProperties": {"type": "object"}},
+    "error_patterns": {"type": "object", "additionalProperties": {"type": "object"}},
+    "review_queue": {"type": "array", "items": {"type": "object"}},
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  }
+}

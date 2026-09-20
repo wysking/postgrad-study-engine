@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "event_id": "demo-20260810-attempt-001",
+  "timestamp": "2026-08-10T09:00:00+08:00",
+  "event_type": "attempt",
+  "subject": "math",
+  "unit_ids": ["math.calculus.limit.equivalent_substitution"],
+  "activity": "solve",
+  "source_ref": "demo-only",
+  "attempt": {
+    "question_id": "demo-limit-001",
+    "result": "correct",
+    "answer_mode": "independent",
+    "process_check": "clean",
+    "assistance_level": 0,
+    "time_minutes": 8,
+    "confidence_before": 0.8,
+    "evidence": "Independent result with a coherent draft."
+  }
+}

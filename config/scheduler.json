@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "model_version": "constrained-priority-0.1",
+  "current_phase": "example",
+  "phase_subjects": ["math", "english", "materials", "politics", "physical_chemistry", "math_contest"],
+  "subject_weights": {
+    "math": 1.0,
+    "english": 1.0,
+    "materials": 1.0,
+    "politics": 1.0,
+    "physical_chemistry": 1.0,
+    "math_contest": 1.0
+  },
+  "subject_activation": {},
+  "weights": {
+    "expected_score_gain": 4.0,
+    "forgetting_risk": 2.5,
+    "information_gain": 2.0,
+    "transfer_value": 1.25,
+    "urgency": 2.0,
+    "error_recurrence": 1.5,
+    "fatigue_cost": 1.0
+  },
+  "max_subject_share": 0.65,
+  "mastery_target": 0.75,
+  "prerequisite_threshold": 0.55,
+  "beam_limit": 20000
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/mobile_request.schema.json",
+  "title": "Postgrad Study Engine mobile request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "created_at", "operation", "payload"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "request_id": {"type": "string", "pattern": "^[^\\s]+$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "operation": {
+      "enum": [
+        "record_attempt", "record_diagnosis", "register_unit", "save_session_result",
+        "request_schedule", "update_source_reference", "record_contest_baseline",
+        "project_change_request"
+      ]
+    },
+    "payload": {"type": "object"},
+    "client": {"type": "string", "minLength": 1}
+  }
+}
