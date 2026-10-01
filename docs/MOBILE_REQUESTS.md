@@ -27,3 +27,16 @@ The processor writes `outbox/<request_id>.json` with the same request ID,
 request hash, operation, status, and engine version. It is safe to retry a
 request after a network failure: the existing receipt is returned if the hash
 matches.
+
+Operations execute in a temporary staged Vault. Outputs are published only
+after validation and export generation succeed; the same-ID receipt is
+published last. Caught publication errors restore earlier file contents before
+writing a failed receipt. Run only one writer per Vault: GitHub workflows must
+serialize processing, and local processing must not overlap another writer.
+This protects against caught errors; it is not a crash-safe, multi-file database
+transaction. An abrupt termination requires isolated replay and receipt review.
+
+Invalid JSON or an invalid request envelope produces a file-level CLI failure
+and exit code 2, while later independent files are still processed. No receipt
+is invented when the request ID or operation is untrustworthy. Existing failed
+receipts remain idempotent and require explicit review rather than silent retry.

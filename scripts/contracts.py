@@ -76,7 +76,7 @@ def _reject_extra(value: dict[str, Any], allowed: set[str], path: str) -> None:
 
 
 def _require_enum(value: Any, allowed: set[str], path: str) -> str:
-    if value not in allowed:
+    if not isinstance(value, str) or value not in allowed:
         raise ContractError(f"{path} must be one of: {', '.join(sorted(allowed))}")
     return str(value)
 

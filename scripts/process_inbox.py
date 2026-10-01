@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,6 +41,15 @@ DERIVED_STATE_RELATIVE = Path("state") / "derived_state.json"
 EXPORTS_RELATIVE = Path("exports")
 SOURCES_RELATIVE = Path("sources") / "references.jsonl"
 CHANGE_REQUESTS_RELATIVE = Path("config") / "personal" / "project_change_requests.jsonl"
+DURABLE_OUTPUTS = (
+    EVENTS_RELATIVE,
+    UNITS_RELATIVE,
+    DERIVED_STATE_RELATIVE,
+    EXPORTS_RELATIVE / "latest.json",
+    EXPORTS_RELATIVE / "latest.md",
+    SOURCES_RELATIVE,
+    CHANGE_REQUESTS_RELATIVE,
+)
 
 
 def _utc_now() -> str:
@@ -359,6 +369,54 @@ def _write_receipt(vault_root: Path, request: dict[str, Any], response: dict[str
     dump_json_atomic(path, response)
 
 
+def _write_bytes_atomic(path: Path, content: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except OSError:
+            pass
+        raise
+
+
+def _publish_outputs(vault_root: Path, staged_root: Path, request_id: str) -> None:
+    """Publish a completed operation, with its receipt last; undo caught failures.
+
+    The caller must serialize writers. This is not a crash-safe multi-file
+    transaction: an abrupt process termination still requires isolated replay.
+    """
+    relatives = (*DURABLE_OUTPUTS, Path("outbox") / f"{request_id}.json")
+    updates: list[tuple[Path, bytes, bytes | None]] = []
+    for relative in relatives:
+        staged = staged_root / relative
+        if not staged.exists():
+            continue
+        destination = vault_root / relative
+        prior = destination.read_bytes() if destination.exists() else None
+        content = staged.read_bytes()
+        if content != prior:
+            updates.append((destination, content, prior))
+    installed: list[tuple[Path, bytes | None]] = []
+    try:
+        for destination, content, prior in updates:
+            _write_bytes_atomic(destination, content)
+            installed.append((destination, prior))
+    except BaseException:
+        for destination, prior in reversed(installed):
+            if prior is None:
+                destination.unlink()
+            else:
+                _write_bytes_atomic(destination, prior)
+        raise
+
+
 def process_file(vault_root: Path, request_path: Path) -> dict[str, Any]:
     raw = load_json(request_path)
     request = validate_mobile_request(raw)
@@ -368,12 +426,25 @@ def process_file(vault_root: Path, request_path: Path) -> dict[str, Any]:
         if not isinstance(existing, dict) or existing.get("request_hash") != _request_hash(request):
             raise ContractError(f"request_id already has a different receipt: {request['request_id']}")
         validate_mobile_response(existing)
+        if existing["request_id"] != request["request_id"] or existing["operation"] != request["operation"]:
+            raise ContractError("existing receipt does not match the request ID and operation")
         return existing
     try:
-        response = process_request(vault_root, request)
+        with tempfile.TemporaryDirectory(prefix="study-request-", ignore_cleanup_errors=True) as temporary:
+            staged_root = Path(temporary)
+            inputs = (*DURABLE_OUTPUTS, Path("config/personal/scheduler.json"), Path("config/scheduler.json"))
+            for relative in inputs:
+                source = vault_root / relative
+                if source.exists():
+                    destination = staged_root / relative
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(source, destination)
+            response = process_request(staged_root, request)
+            _write_receipt(staged_root, request, response)
+            _publish_outputs(vault_root, staged_root, request["request_id"])
     except (ContractError, OSError, ValueError) as exc:
         response = _response(request, "failed", error={"code": type(exc).__name__, "message": str(exc)})
-    _write_receipt(vault_root, request, response)
+        _write_receipt(vault_root, request, response)
     return response
 
 
@@ -388,7 +459,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     responses = []
     for path in paths:
-        responses.append(process_file(args.vault_root, path))
+        try:
+            responses.append(process_file(args.vault_root, path))
+        except (ContractError, OSError, ValueError) as exc:
+            # An invalid envelope has no trustworthy ID/operation for a receipt.
+            # Report the file failure and continue processing independent files.
+            responses.append({
+                "status": "failed", "request_file": path.name,
+                "error": {"code": type(exc).__name__, "message": str(exc)},
+            })
     print(json.dumps({"status": "processed", "responses": responses}, ensure_ascii=False))
     return 2 if any(response["status"] == "failed" for response in responses) else 0
 

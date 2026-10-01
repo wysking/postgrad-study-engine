@@ -40,6 +40,8 @@
 
 同一个 `diagnosis_id` 的状态变化必须追加新事件，通过 `supersedes_event_id` 形成线性修订链，不得改写旧事件。
 
+`hypothesized` 和 `unresolved` 的下一步仍进入按诊断、知识单元分别保留的鉴别队列，但不加入 confirmed 错误统计。同一单元的新题正确不能关闭其他诊断；清晰、独立且关联 `parent_diagnosis_id` 的成功才完成对应单元的复测任务，随后安排延迟复习。确认一次具体错误不等于已证实长期稳定错误模式。
+
 ## Error Structure
 
 诊断尽量区分：
