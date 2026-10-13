@@ -33,3 +33,13 @@ refresh schedules before a reviewed release and separate Vault lock upgrade.
 The two-success gate is a conservative reporting rule, not a calibrated mastery
 criterion. Scheduler code and weights are unchanged, but changed evidence
 summaries can change its derived candidate values.
+
+## Explicit failed-request recovery
+
+Old receipts remain unchanged during ordinary replay. The optional single-file
+--retry-failed path can replace a reviewed same-ID/hash failed receipt only
+after its staged operation succeeds; the new receipt retains the complete prior
+failure under result.recovery. An existing event is reused only when its content
+matches exactly. Conflicts abort, and receipt publication failures roll back
+caught output changes. No production recovery or Vault workflow change is
+performed as part of this Core proposal.

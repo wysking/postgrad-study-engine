@@ -7,6 +7,7 @@
 - Align the published independent/assistance rule with runtime validation and reject boolean assistance/delay values.
 - Require an active matching parent diagnosis and qualified per-unit performance before closing diagnostic work; explanations cannot substitute for independent solving.
 - Keep current errors and unverified results immediately due regardless of a later review recommendation; retain legitimate recall-only closure without solving credit.
+- Add an explicit single-request failed-receipt recovery option, preserving the original ID/hash, deduplicating partial historical appends and retaining prior failure provenance. Default processing never silently retries failed receipts.
 
 - Stage each mobile operation before publishing durable outputs and its receipt; restore prior files on caught publication failures.
 - Continue processing independent inbox files after an invalid JSON/envelope, while reporting a file failure without inventing a receipt.
