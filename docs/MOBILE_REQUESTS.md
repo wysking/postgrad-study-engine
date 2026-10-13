@@ -31,8 +31,15 @@ matches.
 Operations execute in a temporary staged Vault. Outputs are published only
 after validation and export generation succeed; the same-ID receipt is
 published last. Caught publication errors restore earlier file contents before
-writing a failed receipt. Run only one writer per Vault: GitHub workflows must
-serialize processing, and local processing must not overlap another writer.
+writing a failed receipt. `process_file` holds a non-blocking operating-system
+lock across receipt lookup, staging and publication. A contending process
+reports a file-level error without creating a sticky failed receipt; retry the
+same request after the writer exits. The untracked `.study-inbox.lock` file
+remains, but closing or terminating its owner releases the kernel lock.
+Never commit or delete an active lock file. GitHub workflows must also
+serialize processing because their runners use separate checkouts. Older Core
+versions, direct `process_request` calls and standalone append/rebuild commands
+do not acquire this guard and must not overlap production processing.
 This protects against caught errors; it is not a crash-safe, multi-file database
 transaction. An abrupt termination requires isolated replay and receipt review.
 

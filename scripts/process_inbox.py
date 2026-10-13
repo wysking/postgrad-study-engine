@@ -8,11 +8,13 @@ validation succeeds and an ``outbox/<request_id>.json`` receipt is written.
 from __future__ import annotations
 
 import argparse
+import errno
 import hashlib
 import json
 import os
 import shutil
 import tempfile
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -417,7 +419,40 @@ def _publish_outputs(vault_root: Path, staged_root: Path, request_id: str) -> No
         raise
 
 
+@contextmanager
+def _vault_writer(vault_root: Path):
+    """Guard a checkout's read/stage/publish cycle with a kernel-held lock.
+
+    Keep the file inode after closing: deleting it would let a third writer
+    lock a new inode while another writer still holds the old one. Closing or
+    terminating the process releases ownership, even when the file remains.
+    Separate GitHub runner checkouts additionally need workflow concurrency.
+    """
+    with (vault_root / ".study-inbox.lock").open("a+b") as handle:
+        try:
+            if os.name == "nt":
+                import msvcrt
+                if handle.tell() == 0:
+                    handle.write(b"\0")
+                    handle.flush()
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as exc:
+            if exc.errno in {errno.EACCES, errno.EAGAIN}:
+                raise ContractError("another inbox writer is active for this Vault; retry the same request later") from exc
+            raise
+        yield
+
+
 def process_file(vault_root: Path, request_path: Path, *, retry_failed: bool = False) -> dict[str, Any]:
+    with _vault_writer(vault_root):
+        return _process_file_unlocked(vault_root, request_path, retry_failed=retry_failed)
+
+
+def _process_file_unlocked(vault_root: Path, request_path: Path, *, retry_failed: bool) -> dict[str, Any]:
     raw = load_json(request_path)
     request = validate_mobile_request(raw)
     receipt_path = vault_root / "outbox" / f"{request['request_id']}.json"

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Guard each inbox read/stage/publish cycle with a non-blocking operating-system lock; report contention without a sticky failed receipt and release ownership on process exit. Separate runner checkouts still require serialized workflows.
 - Enforce review due dates and registered prerequisites for external learning candidates; select at most one generic correction/diagnostic per unit per session without removing unresolved work or changing scoring weights.
 - Qualify independent evidence consistently across scoring, success counts and review advancement; keep supported explanations and all failure observations.
 - Add positive-evidence counts and coverage; keep overall unknown until target coverage and repeated unassisted evidence support it. Use heuristic-evidence-0.2 without rewriting 1.0 events or changing scheduler weights.

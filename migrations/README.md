@@ -56,3 +56,14 @@ failure under result.recovery. An existing event is reused only when its content
 matches exactly. Conflicts abort, and receipt publication failures roll back
 caught output changes. No production recovery or Vault workflow change is
 performed as part of this Core proposal.
+
+## Inbox writer guard
+
+`process_file` now serializes cooperating writers in one checkout. Contention
+fails before any operation receipt or durable learning output is written and
+can be retried with the same ID/hash. An untracked lock file remains after
+process exit; ownership resides in the operating system, not file existence.
+Do not delete it while processing. This cannot serialize independent runner
+checkouts or older/direct writers; a separately reviewed Vault workflow must
+provide cloud concurrency control. Crash-safe multi-file publication is still
+outside this release.
