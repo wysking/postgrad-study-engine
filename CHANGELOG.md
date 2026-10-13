@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.3.1 - Release candidate (unreleased)
 
 - Guard each inbox read/stage/publish cycle with a non-blocking operating-system lock; report contention without a sticky failed receipt and release ownership on process exit. Separate runner checkouts still require serialized workflows.
 - Enforce review due dates and registered prerequisites for external learning candidates; select at most one generic correction/diagnostic per unit per session without removing unresolved work or changing scoring weights.
@@ -16,6 +16,8 @@
 - Keep each unresolved diagnosis visible in the review queue without adding it to confirmed error statistics.
 - Preserve ledger order for equal-timestamp diagnosis revisions and track targeted completion per knowledge unit.
 - Keep event schema 1.0; diagnosis task IDs now include the unit ID. A reviewed release and separate Vault lock upgrade are required before production adoption.
+
+Release status and verification gates: see `docs/RELEASE_REVIEW_0_3_1.md`.
 
 ## v0.3.0 - 2026-09-20
 

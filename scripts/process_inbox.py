@@ -36,7 +36,7 @@ from scripts.reducer import build_context_capsule, load_units, rebuild_state
 from scripts.scheduler import build_schedule
 
 
-ENGINE_VERSION = "0.3.0"
+ENGINE_VERSION = "0.3.1"
 EVENTS_RELATIVE = Path("events") / "learning_events.jsonl"
 UNITS_RELATIVE = Path("state") / "knowledge_units.json"
 DERIVED_STATE_RELATIVE = Path("state") / "derived_state.json"
