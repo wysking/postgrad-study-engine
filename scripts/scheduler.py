@@ -10,7 +10,7 @@ from typing import Any
 from scripts.contracts import ACTIVITIES, SUBJECTS, ContractError, parse_datetime
 
 
-SCHEDULER_MODEL_VERSION = "constrained-priority-0.1"
+SCHEDULER_MODEL_VERSION = "constrained-priority-0.2"
 TASK_TYPES = {"learn", "practice", "review", "diagnostic", "correction", "targeted_variant", "timed_practice"}
 
 
@@ -78,6 +78,8 @@ def validate_candidate(candidate: Any) -> dict[str, Any]:
         raise ContractError(f"candidate missing required fields: {', '.join(missing)}")
     if not isinstance(candidate["task_id"], str) or not candidate["task_id"].strip():
         raise ContractError("candidate.task_id must be non-empty")
+    if "unit_id" in candidate and (not isinstance(candidate["unit_id"], str) or not candidate["unit_id"].strip()):
+        raise ContractError("candidate.unit_id must be a non-empty string when supplied")
     if candidate["subject"] not in SUBJECTS:
         raise ContractError("candidate.subject is unknown")
     if not isinstance(candidate["estimated_minutes"], int) or isinstance(candidate["estimated_minutes"], bool) or candidate["estimated_minutes"] < 1:
@@ -102,6 +104,23 @@ def _recurrence_for_task(task: dict[str, Any], state: dict[str, Any]) -> float:
     if not counts:
         return 0.0
     return _clamp(max(counts) / 3.0)
+
+
+def _prerequisites_ready(unit: dict[str, Any], state: dict[str, Any], config: dict[str, Any]) -> bool:
+    threshold = float(config.get("prerequisite_threshold", 0.55))
+    return all(
+        state.get("units", {}).get(prerequisite, {}).get("mastery_overall") is not None
+        and float(state["units"][prerequisite]["mastery_overall"]) >= threshold
+        for prerequisite in unit.get("prerequisites", [])
+    )
+
+
+def _immediate_check_group(candidate: dict[str, Any]) -> str | None:
+    # Generic checks on one unit compete for one session slot. Distinct
+    # diagnoses remain separate: a shared unit does not prove a shared cause.
+    if candidate.get("task_type") in {"correction", "diagnostic"} and not candidate.get("diagnosis_id"):
+        return candidate.get("unit_id")
+    return None
 
 
 def candidates_from_state(state: dict[str, Any], as_of: datetime, config: dict[str, Any]) -> list[dict[str, Any]]:
@@ -131,17 +150,11 @@ def candidates_from_state(state: dict[str, Any], as_of: datetime, config: dict[s
         candidates.append(candidate)
         queued_units.add(task["unit_id"])
 
-    threshold = float(config.get("prerequisite_threshold", 0.55))
     mastery_target = float(config.get("mastery_target", 0.75))
     for unit_id, unit in sorted(state.get("units", {}).items()):
         if unit_id in queued_units:
             continue
-        prerequisites = unit.get("prerequisites", [])
-        ready = all(
-            state.get("units", {}).get(prerequisite, {}).get("mastery_overall") is not None
-            and float(state["units"][prerequisite]["mastery_overall"]) >= threshold
-            for prerequisite in prerequisites
-        )
+        ready = _prerequisites_ready(unit, state, config)
         attempts = int(unit.get("attempts", {}).get("total", 0))
         mastery = unit.get("mastery_overall")
         if attempts == 0:
@@ -208,6 +221,7 @@ class _Selection:
     minutes: int
     fatigue_units: int
     subject_minutes: tuple[int, ...]
+    unit_checks: frozenset[str]
 
 
 def _select_constrained(
@@ -221,14 +235,17 @@ def _select_constrained(
     subject_index = {subject: index for index, subject in enumerate(subjects)}
     cap = available_minutes if len(subjects) <= 1 else max(1, math.ceil(available_minutes * max_subject_share))
     fatigue_cap = None if fatigue_budget is None else round(fatigue_budget * 100)
-    start = _Selection(0.0, (), 0, 0, tuple(0 for _ in subjects))
-    states: dict[tuple[int, int, tuple[int, ...]], _Selection] = {(0, 0, start.subject_minutes): start}
+    start = _Selection(0.0, (), 0, 0, tuple(0 for _ in subjects), frozenset())
+    states = {(0, 0, start.subject_minutes, start.unit_checks): start}
     for index, candidate in enumerate(candidates):
-        additions: dict[tuple[int, int, tuple[int, ...]], _Selection] = {}
+        additions = {}
         duration = candidate["estimated_minutes"]
         fatigue = round(_number(candidate.get("fatigue_cost", 0.0)) * 100)
         score = candidate["score_breakdown"]["total"]
+        check_group = _immediate_check_group(candidate)
         for state in states.values():
+            if check_group is not None and check_group in state.unit_checks:
+                continue
             minutes = state.minutes + duration
             fatigue_units = state.fatigue_units + fatigue
             if minutes > available_minutes or (fatigue_cap is not None and fatigue_units > fatigue_cap):
@@ -239,15 +256,16 @@ def _select_constrained(
             if subject_minutes[position] > cap:
                 continue
             subject_tuple = tuple(subject_minutes)
-            selection = _Selection(state.score + score, state.indices + (index,), minutes, fatigue_units, subject_tuple)
-            key = (minutes, fatigue_units, subject_tuple)
+            unit_checks = state.unit_checks | {check_group} if check_group is not None else state.unit_checks
+            selection = _Selection(state.score + score, state.indices + (index,), minutes, fatigue_units, subject_tuple, unit_checks)
+            key = (minutes, fatigue_units, subject_tuple, unit_checks)
             current = additions.get(key) or states.get(key)
             if current is None or (selection.score, tuple(-i for i in selection.indices)) > (current.score, tuple(-i for i in current.indices)):
                 additions[key] = selection
         states.update(additions)
         if len(states) > beam_limit:
             best = sorted(states.values(), key=lambda item: (-item.score, -item.minutes, item.indices))[:beam_limit]
-            states = {(item.minutes, item.fatigue_units, item.subject_minutes): item for item in best}
+            states = {(item.minutes, item.fatigue_units, item.subject_minutes, item.unit_checks): item for item in best}
     chosen = max(states.values(), key=lambda item: (item.score, item.minutes, tuple(-i for i in item.indices)))
     return chosen.indices
 
@@ -275,7 +293,14 @@ def build_schedule(state: dict[str, Any], request: dict[str, Any], config: dict[
         if activation is not None and as_of < activation:
             excluded.append({"task_id": task_id, "reason": "subject_not_active"})
             continue
+        if candidate.get("task_type") == "review" and candidate.get("due_at") and parse_datetime(candidate["due_at"]) > as_of:
+            excluded.append({"task_id": task_id, "reason": "review_not_due"})
+            continue
         if candidate.get("prerequisite_ready", True) is not True:
+            excluded.append({"task_id": task_id, "reason": "prerequisite_not_ready"})
+            continue
+        unit = state.get("units", {}).get(candidate.get("unit_id"))
+        if unit is not None and candidate.get("task_type", "practice") in {"learn", "practice", "timed_practice"} and not _prerequisites_ready(unit, state, config):
             excluded.append({"task_id": task_id, "reason": "prerequisite_not_ready"})
             continue
         if candidate["estimated_minutes"] > request["available_minutes"]:
@@ -296,9 +321,11 @@ def build_schedule(state: dict[str, Any], request: dict[str, Any], config: dict[
     )
     chosen_ids = {eligible[index]["task_id"] for index in chosen_indices}
     selected = [eligible[index] for index in chosen_indices]
+    chosen_checks = {_immediate_check_group(item) for item in selected} - {None}
     for candidate in eligible:
         if candidate["task_id"] not in chosen_ids:
-            excluded.append({"task_id": candidate["task_id"], "reason": "lower_value_under_constraints"})
+            reason = "overlapping_unit_check" if _immediate_check_group(candidate) in chosen_checks else "lower_value_under_constraints"
+            excluded.append({"task_id": candidate["task_id"], "reason": reason})
 
     tier = {"correction": 0, "targeted_variant": 0, "diagnostic": 0, "review": 1, "practice": 2, "learn": 3, "timed_practice": 2}
     selected.sort(key=lambda item: (tier.get(item.get("task_type", "practice"), 2), item.get("due_at", "9999"), -item["score_breakdown"]["total"], item["task_id"]))
@@ -321,7 +348,8 @@ def build_schedule(state: dict[str, Any], request: dict[str, Any], config: dict[
         warnings.append("Some time remains unused because no additional indivisible task satisfied all constraints.")
     return {
         "schema_version": "1.0",
-        "model_version": config.get("model_version", SCHEDULER_MODEL_VERSION),
+        "model_version": SCHEDULER_MODEL_VERSION,
+        "config_model_version": config.get("model_version"),
         "phase": config.get("current_phase", "unspecified"),
         "as_of": as_of.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"),
         "available_minutes": request["available_minutes"],

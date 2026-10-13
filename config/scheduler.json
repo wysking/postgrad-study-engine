@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "model_version": "constrained-priority-0.1",
+  "model_version": "constrained-priority-0.2",
   "current_phase": "example",
   "phase_subjects": ["math", "english", "materials", "politics", "physical_chemistry", "math_contest"],
   "subject_weights": {

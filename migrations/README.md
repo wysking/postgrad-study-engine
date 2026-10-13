@@ -31,8 +31,21 @@ now be null even when one dimension has observations. Consumers must keep
 unknown distinct from zero. Rebuild from the same ledger, compare outputs, and
 refresh schedules before a reviewed release and separate Vault lock upgrade.
 The two-success gate is a conservative reporting rule, not a calibrated mastery
-criterion. Scheduler code and weights are unchanged, but changed evidence
-summaries can change its derived candidate values.
+criterion. Changed evidence summaries can change derived candidate values;
+the separate eligibility change below leaves scoring weights unchanged.
+
+## Unreleased scheduling eligibility
+
+Review tasks with future due dates are excluded with `review_not_due`. Known
+unit prerequisites apply equally to external learning/practice candidates;
+remediation remains eligible to probe a gap. Generic correction/diagnostic
+checks share a per-unit session slot, but diagnosis-specific tasks and the
+underlying review queue are preserved. The score formula, weights and input
+schema are unchanged. Compare fixed-input plans before adopting these changed
+constraints; a different plan is not evidence of improved learning.
+Output `model_version` now identifies the executed `constrained-priority-0.2`
+implementation. The caller's existing label is retained separately in optional
+`config_model_version`; old personal configuration remains readable.
 
 ## Explicit failed-request recovery
 
