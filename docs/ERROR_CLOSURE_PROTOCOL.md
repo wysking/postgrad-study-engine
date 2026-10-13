@@ -44,6 +44,10 @@
 
 ## Error Structure
 
+完成诊断任务还必须匹配已出现、未 rejected 的父诊断和实际受测单元。只带 parent_diagnosis_id 不构成完成证据；同一单元的 explain 正确不能替代独立求解。孤立或跨单元父引用保留历史事件，但输出警告且不关闭诊断。
+
+明确没有 independent 目标的回忆单元，可以用无提示、过程可核查的 recall/review 完成对应检索任务，不增加独立解题计数。错题、部分作答、猜测、不确定或过程缺失需要即时核验；recommended_review_at 不能把这些问题推迟到任意未来。辅助正确仍需次日确认。
+
 诊断尽量区分：
 
 - `first_divergence`: 草稿或推理中最早出现的客观偏离；

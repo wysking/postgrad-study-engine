@@ -51,6 +51,18 @@ def _qualified_positive(event: dict[str, Any], dimension: str) -> bool:
     return _unassisted_success(event)
 
 
+def _unit_review_success(event: dict[str, Any], unit: dict[str, Any]) -> bool:
+    if _clean_independent_success(event):
+        return True
+    # A recall-only unit can close retrieval work without pretending it solved
+    # a mathematical problem. A solving target still needs actual solving.
+    return (
+        "independent" not in unit["evidence_targets"]
+        and event["activity"] in {"recall", "review"}
+        and _unassisted_success(event)
+    )
+
+
 def _iso(value: datetime) -> str:
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -179,16 +191,18 @@ def _update_mastery(unit: dict[str, Any], event: dict[str, Any]) -> None:
 
 
 def _review_time(event: dict[str, Any]) -> datetime:
-    if event.get("recommended_review_at"):
-        return parse_datetime(event["recommended_review_at"], "recommended_review_at")
     attempt = event["attempt"]
     timestamp = parse_datetime(event["timestamp"])
     if attempt["result"] != "correct":
         return timestamp
-    if attempt["answer_mode"] in {"guess", "uncertain"} or attempt["process_check"] == "suspicious":
+    if attempt["answer_mode"] in {"guess", "uncertain"} or attempt["process_check"] != "clean":
         return timestamp
-    if attempt["assistance_level"] > 0:
+    if attempt["assistance_level"] > 0 or attempt["answer_mode"] == "assisted":
         return timestamp + timedelta(days=1)
+    if not _clean_independent_success(event) and event["activity"] not in {"recall", "review"}:
+        return timestamp
+    if event.get("recommended_review_at"):
+        return max(timestamp, parse_datetime(event["recommended_review_at"], "recommended_review_at"))
     if attempt.get("variant_level") == "isomorphic":
         return timestamp + timedelta(days=3)
     if attempt.get("variant_level") in {"near_transfer", "boundary"}:
@@ -233,12 +247,12 @@ def _queue_task(
 def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any], event: dict[str, Any]) -> None:
     attempt = event["attempt"]
     unit_id = unit["unit_id"]
-    if _clean_independent_success(event):
+    if _unit_review_success(event, unit):
         for key in (f"diagnostic:{unit_id}", f"correction:{unit_id}"):
             queue.pop(key, None)
-        if attempt.get("parent_diagnosis_id"):
-            queue.pop(f"targeted_variant:{attempt['parent_diagnosis_id']}:{unit_id}", None)
-        _queue_task(queue, unit, event, "review", "delayed confirmation after clean independent success", _review_time(event))
+        # Diagnosis-specific work is rebuilt from validated per-unit
+        # completions below, not cleared by the presence of a parent string.
+        _queue_task(queue, unit, event, "review", "delayed confirmation after qualified unassisted success", _review_time(event))
         return
     if attempt["result"] != "correct":
         _queue_task(queue, unit, event, "correction", "incorrect or incomplete attempt needs diagnosis and correction", _review_time(event))
@@ -275,12 +289,18 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
         if event["event_type"] == "attempt":
             attempt = event["attempt"]
             attempt_questions[event["event_id"]] = attempt["question_id"]
-            if (
-                attempt.get("parent_diagnosis_id")
-                and _clean_independent_success(event)
-            ):
+            if attempt.get("parent_diagnosis_id"):
                 diagnosis_id = attempt["parent_diagnosis_id"]
-                for unit_id in event["unit_ids"]:
+                parent = diagnoses.get(diagnosis_id)
+                matching = (
+                    set(event["unit_ids"]) & set(parent["unit_ids"])
+                    if parent and parent["status"] != "rejected" else set()
+                )
+                if not matching:
+                    warnings.append(f"Attempt {event['event_id']} cannot complete unmatched parent diagnosis {diagnosis_id}.")
+                for unit_id in sorted(matching):
+                    if not _unit_review_success(event, units[unit_id]):
+                        continue
                     key = (diagnosis_id, unit_id)
                     completed_variants[key] = max(
                         completed_variants.get(key, minimum_order),
@@ -337,7 +357,7 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
             for kind in ("correction", "diagnostic"):
                 key = f"{kind}:{unit_id}"
                 task = queue.get(key)
-                if task and (
+                if task and event_order[task["source_event_id"]] <= event_order[diagnosis["event_id"]] and (
                     task["source_event_id"] in diagnosis.get("evidence_refs", [])
                     or (
                         attempt_questions.get(task["source_event_id"]) == diagnosis["question_id"]
