@@ -22,3 +22,14 @@ processing stages writes and rolls back caught publication failures; abrupt
 termination and multiple writers still require explicit operational controls.
 Publish a reviewed Core release first, then propose a separate lock-only Vault
 upgrade. Existing receipts retain their original version and status.
+
+## Unreleased evidence qualification
+
+heuristic-evidence-0.2 keeps event schema 1.0 and adds optional unit-level
+positive-evidence counts and coverage in rebuilt state. Overall summaries may
+now be null even when one dimension has observations. Consumers must keep
+unknown distinct from zero. Rebuild from the same ledger, compare outputs, and
+refresh schedules before a reviewed release and separate Vault lock upgrade.
+The two-success gate is a conservative reporting rule, not a calibrated mastery
+criterion. Scheduler code and weights are unchanged, but changed evidence
+summaries can change its derived candidate values.

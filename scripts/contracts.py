@@ -312,7 +312,7 @@ def validate_attempt(attempt: Any) -> dict[str, Any]:
     _require_enum(attempt["result"], RESULTS, "attempt.result")
     _require_enum(attempt["answer_mode"], ANSWER_MODES, "attempt.answer_mode")
     _require_enum(attempt["process_check"], PROCESS_CHECKS, "attempt.process_check")
-    if not isinstance(attempt["assistance_level"], int) or not 0 <= attempt["assistance_level"] <= 5:
+    if isinstance(attempt["assistance_level"], bool) or not isinstance(attempt["assistance_level"], int) or not 0 <= attempt["assistance_level"] <= 5:
         raise ContractError("attempt.assistance_level must be an integer from 0 to 5")
     if "time_minutes" in attempt:
         _require_number(attempt["time_minutes"], "attempt.time_minutes", minimum=0.000001)
@@ -323,7 +323,7 @@ def validate_attempt(attempt: Any) -> dict[str, Any]:
         _require_enum(attempt["variant_level"], VARIANT_LEVELS, "attempt.variant_level")
         if "parent_diagnosis_id" not in attempt:
             raise ContractError("variant attempt needs parent_diagnosis_id")
-    if "delayed_days" in attempt and (not isinstance(attempt["delayed_days"], int) or attempt["delayed_days"] < 0):
+    if "delayed_days" in attempt and (isinstance(attempt["delayed_days"], bool) or not isinstance(attempt["delayed_days"], int) or attempt["delayed_days"] < 0):
         raise ContractError("attempt.delayed_days must be an integer >= 0")
     for key in ("evidence", "parent_diagnosis_id"):
         if key in attempt and (not isinstance(attempt[key], str) or not attempt[key].strip()):

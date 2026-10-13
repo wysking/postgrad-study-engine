@@ -6,11 +6,49 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from scripts.contracts import parse_datetime, validate_knowledge_unit
+from scripts.contracts import parse_datetime, validate_knowledge_unit, validate_learning_event
 
 
-MODEL_VERSION = "heuristic-evidence-0.1"
+MODEL_VERSION = "heuristic-evidence-0.2"
 DIMENSIONS = ("comprehension", "recall", "independent", "transfer", "delayed", "timed")
+SOLVING_ACTIVITIES = {"solve", "variant", "timed_practice"}
+
+
+def _unassisted_success(event: dict[str, Any]) -> bool:
+    attempt = event["attempt"]
+    return (
+        attempt["result"] == "correct"
+        and attempt["answer_mode"] in {"independent", "recalled"}
+        and attempt["process_check"] == "clean"
+        and attempt["assistance_level"] == 0
+    )
+
+
+def _clean_independent_success(event: dict[str, Any]) -> bool:
+    return (
+        _unassisted_success(event)
+        and event["attempt"]["answer_mode"] == "independent"
+        and event["activity"] in SOLVING_ACTIVITIES
+    )
+
+
+def _qualified_positive(event: dict[str, Any], dimension: str) -> bool:
+    """Activity nominates a dimension; observable response fields qualify it."""
+    attempt = event["attempt"]
+    if dimension == "comprehension":
+        # Supported explanations retain value without claiming independence.
+        return (
+            attempt["result"] == "correct"
+            and attempt["answer_mode"] != "guess"
+            and attempt["process_check"] == "clean"
+        )
+    if dimension in {"independent", "transfer", "timed"}:
+        return _clean_independent_success(event) and (
+            dimension != "timed" or "time_minutes" in attempt
+        )
+    if dimension == "delayed" and event["activity"] in SOLVING_ACTIVITIES:
+        return _clean_independent_success(event)
+    return _unassisted_success(event)
 
 
 def _iso(value: datetime) -> str:
@@ -48,6 +86,9 @@ def _new_unit_state(unit_id: str, subject: str, registry: dict[str, dict[str, An
         "evidence_targets": list(spec.get("evidence_targets", DIMENSIONS)),
         "mastery": {},
         "evidence_counts": {dimension: 0 for dimension in DIMENSIONS},
+        "qualified_positive_counts": {dimension: 0 for dimension in DIMENSIONS},
+        "_independent_questions": set(),
+        "_unassisted_successes": 0,
         "attempts": {"total": 0, "correct": 0, "partial": 0, "incorrect": 0, "unanswered": 0},
         "clean_independent_correct": 0,
         "flagged_correct": 0,
@@ -67,7 +108,7 @@ def _evidence_dimensions(event: dict[str, Any]) -> list[str]:
         dimensions.append("comprehension")
     if activity in {"recall", "review"}:
         dimensions.append("recall")
-    if activity in {"solve", "timed_practice"}:
+    if activity in SOLVING_ACTIVITIES:
         dimensions.append("independent")
     if activity == "variant":
         dimensions.append("transfer")
@@ -101,14 +142,37 @@ def _update_mastery(unit: dict[str, Any], event: dict[str, Any]) -> None:
     for dimension in dimensions:
         old = float(unit["mastery"].get(dimension, 0.5))
         if positive:
-            new = old + alpha * (1.0 - old)
+            qualified = _qualified_positive(event, dimension)
+            new = old + alpha * (1.0 - old) if qualified else old
+            if qualified:
+                unit["qualified_positive_counts"][dimension] += 1
         else:
+            # Preserve failures, including their original assistance context.
             new = old * (1.0 - alpha)
         unit["mastery"][dimension] = round(max(0.0, min(1.0, new)), 4)
         unit["evidence_counts"][dimension] += 1
 
-    targets = [target for target in unit["evidence_targets"] if target in unit["mastery"]]
-    if targets:
+    if _unassisted_success(event):
+        unit["_unassisted_successes"] += 1
+    if _clean_independent_success(event):
+        unit["_independent_questions"].add(attempt["question_id"])
+    targets = unit["evidence_targets"]
+    observed = [target for target in targets if unit["evidence_counts"][target]]
+    supported = [target for target in targets if unit["qualified_positive_counts"][target]]
+    repeated = (
+        len(unit["_independent_questions"]) >= 2 if "independent" in targets
+        else unit["_unassisted_successes"] >= 2
+    )
+    sufficient = len(supported) == len(targets) and repeated
+    unit["evidence_coverage"] = {
+        "observed_targets": observed,
+        "supported_targets": supported,
+        "missing_targets": [target for target in targets if target not in observed],
+        "unverified_targets": [target for target in observed if target not in supported],
+        "independent_questions": len(unit["_independent_questions"]),
+        "sufficient_for_overall": sufficient,
+    }
+    if sufficient:
         unit["mastery_overall"] = round(sum(unit["mastery"][key] for key in targets) / len(targets), 4)
     else:
         unit["mastery_overall"] = None
@@ -169,7 +233,7 @@ def _queue_task(
 def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any], event: dict[str, Any]) -> None:
     attempt = event["attempt"]
     unit_id = unit["unit_id"]
-    if attempt["result"] == "correct" and attempt["answer_mode"] == "independent" and attempt["process_check"] == "clean":
+    if _clean_independent_success(event):
         for key in (f"diagnostic:{unit_id}", f"correction:{unit_id}"):
             queue.pop(key, None)
         if attempt.get("parent_diagnosis_id"):
@@ -184,6 +248,9 @@ def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any]
 
 def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     registry = registry or {}
+    # Direct callers have the same per-event boundary as inbox/ledger readers.
+    for event in events:
+        validate_learning_event(event)
     # Stable sorting preserves append order for revisions at the same instant.
     ordered = sorted(events, key=lambda item: parse_datetime(item["timestamp"]))
     units: dict[str, dict[str, Any]] = {}
@@ -210,10 +277,7 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
             attempt_questions[event["event_id"]] = attempt["question_id"]
             if (
                 attempt.get("parent_diagnosis_id")
-                and attempt["result"] == "correct"
-                and attempt["answer_mode"] == "independent"
-                and attempt["process_check"] == "clean"
-                and attempt["assistance_level"] == 0
+                and _clean_independent_success(event)
             ):
                 diagnosis_id = attempt["parent_diagnosis_id"]
                 for unit_id in event["unit_ids"]:
@@ -226,7 +290,7 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
                 unit = units[unit_id]
                 unit["attempts"]["total"] += 1
                 unit["attempts"][attempt["result"]] += 1
-                if attempt["result"] == "correct" and attempt["answer_mode"] == "independent" and attempt["process_check"] == "clean" and attempt["assistance_level"] == 0:
+                if _clean_independent_success(event):
                     unit["clean_independent_correct"] += 1
                 elif attempt["result"] == "correct":
                     unit["flagged_correct"] += 1
@@ -296,6 +360,8 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
             )
 
     for unit in units.values():
+        del unit["_independent_questions"]
+        del unit["_unassisted_successes"]
         samples = unit["confidence"]["samples"]
         unit["confidence"]["mean_absolute_error"] = round(unit["confidence"]["absolute_error_sum"] / samples, 4) if samples else None
         del unit["confidence"]["absolute_error_sum"]
