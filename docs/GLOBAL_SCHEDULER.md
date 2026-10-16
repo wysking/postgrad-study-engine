@@ -44,7 +44,7 @@
 - `fatigue_budget` 可选；未提供时疲劳作为软惩罚。
 - `subject_activation` 可由 Vault 配置提供；在激活时间之前，候选会以 `subject_not_active` 排除。
 - 任务不可切分，因此可能留下少量无法填充的时间。
-- 带 `due_at` 的 `review` 只在到期后入选；提前练习应明确作为 `practice`，不能据此声称延迟保持。
+- 带 `due_at` 的 `review`、`diagnostic`、`correction`、`targeted_variant` 只在到期时或之后入选，比较实际带时区的时间点。未来 review 返回 `review_not_due`，未来核验返回 `check_not_due`；辅助正确产生的次日确认不得当日入选。提前练习应明确作为 `practice`，不能据此声称完成延迟确认或延迟保持；排程不移除原队列。
 - 同一单元的通用 `correction` / `diagnostic` 每次计划最多选择一项；保留其余队列和排除原因。具体诊断不因共享单元而合并。
 - 调用方提供的 `learn` / `practice` / `timed_practice` 若对应已登记单元，同样检查登记的先修条件，不能用 `prerequisite_ready: true` 覆盖。纠错和诊断可用于探测先修不足。
 - 没有登记的外部单元仍依赖调用方提供的资格判断；调度器不能推断不存在的知识关系。

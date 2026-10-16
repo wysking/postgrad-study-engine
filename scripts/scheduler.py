@@ -293,8 +293,9 @@ def build_schedule(state: dict[str, Any], request: dict[str, Any], config: dict[
         if activation is not None and as_of < activation:
             excluded.append({"task_id": task_id, "reason": "subject_not_active"})
             continue
-        if candidate.get("task_type") == "review" and candidate.get("due_at") and parse_datetime(candidate["due_at"]) > as_of:
-            excluded.append({"task_id": task_id, "reason": "review_not_due"})
+        if candidate.get("task_type") in {"review", "diagnostic", "correction", "targeted_variant"} and candidate.get("due_at") and parse_datetime(candidate["due_at"]) > as_of:
+            reason = "review_not_due" if candidate["task_type"] == "review" else "check_not_due"
+            excluded.append({"task_id": task_id, "reason": reason})
             continue
         if candidate.get("prerequisite_ready", True) is not True:
             excluded.append({"task_id": task_id, "reason": "prerequisite_not_ready"})
