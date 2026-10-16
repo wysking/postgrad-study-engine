@@ -286,6 +286,10 @@ def build_schedule(state: dict[str, Any], request: dict[str, Any], config: dict[
         if task_id in seen:
             raise ContractError(f"duplicate scheduler candidate task_id: {task_id}")
         seen.add(task_id)
+        unit = state.get("units", {}).get(candidate.get("unit_id"))
+        if unit is not None and candidate["subject"] != unit["subject"]:
+            excluded.append({"task_id": task_id, "reason": "unit_subject_mismatch"})
+            continue
         if candidate["subject"] not in phase_subjects:
             excluded.append({"task_id": task_id, "reason": "subject_not_in_phase"})
             continue
@@ -300,7 +304,6 @@ def build_schedule(state: dict[str, Any], request: dict[str, Any], config: dict[
         if candidate.get("prerequisite_ready", True) is not True:
             excluded.append({"task_id": task_id, "reason": "prerequisite_not_ready"})
             continue
-        unit = state.get("units", {}).get(candidate.get("unit_id"))
         if unit is not None and candidate.get("task_type", "practice") in {"learn", "practice", "timed_practice"} and not _prerequisites_ready(unit, state, config):
             excluded.append({"task_id": task_id, "reason": "prerequisite_not_ready"})
             continue

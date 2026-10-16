@@ -15,7 +15,11 @@ revisions by ledger position. PR #2 adds independently verifiable commits for:
 5. Cooperating inbox writer serialization, with Linux/Windows CI coverage.
 6. Release-candidate metadata and this review record.
 
-The full candidate suite has 85 fictional tests. The separate prior-audit
+The follow-up offline candidate suite has 103 fictional tests, including 18
+normal-mobile-path regressions for target-aware closure, confirmation due
+times and known subject identity. The earlier 85-test tree remains the
+unmodified PR baseline until these patches are reviewed and adopted.
+The separate prior-audit
 acceptance harness has 20 requirements. Neither result measures learning gain.
 Scoring weights and the score formula are unchanged. No FSRS, BKT or FIRe is
 included. Events, requests and receipts retain schema 1.0.
@@ -50,6 +54,15 @@ operation look successful by editing its receipt. Explicit recovery retains
 the old failed receipt and refuses changed identities/content.
 
 ## Remaining limits
+
+The follow-up patches address three reproduced release-blocker groups; they
+do not establish release readiness. A separate fictional acceptance check
+still accepts a purported confirmed draft diagnosis based only on an
+ambiguous critical transcription and caller-declared verification. Resolve
+that source-admission gate with legacy-read compatibility and positive
+controls before declaring the full evidence audit complete. Do not try to
+infer truth by keyword matching in learner_verdict. A long-term research
+reporter and additional subject contracts are not implemented by these fixes.
 
 The writer guard is advisory and local to one checkout. Cloud runners need a
 shared workflow concurrency group and a fresh default-branch checkout; direct

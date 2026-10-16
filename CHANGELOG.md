@@ -2,6 +2,10 @@
 
 ## v0.3.1 - Release candidate (unreleased)
 
+- Require a qualified, actually tested target for diagnosis completion. Transfer-only and timed-only work cannot be closed by recall, and unmeasured timed work stays open without discarding genuine independent solving evidence.
+- Respect future due times for diagnostic, correction and targeted checks as well as reviews; keep explicitly labeled early practice separate from delayed confirmation.
+- Exclude scheduler candidates whose subject conflicts with a known unit before applying phase, activation and subject-time constraints.
+
 - Guard each inbox read/stage/publish cycle with a non-blocking operating-system lock; report contention without a sticky failed receipt and release ownership on process exit. Separate runner checkouts still require serialized workflows.
 - Enforce review due dates and registered prerequisites for external learning candidates; select at most one generic correction/diagnostic per unit per session without removing unresolved work or changing scoring weights.
 - Qualify independent evidence consistently across scoring, success counts and review advancement; keep supported explanations and all failure observations.
