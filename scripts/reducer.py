@@ -55,12 +55,26 @@ def _unit_review_success(event: dict[str, Any], unit: dict[str, Any]) -> bool:
     if _clean_independent_success(event):
         return True
     # A recall-only unit can close retrieval work without pretending it solved
-    # a mathematical problem. A solving target still needs actual solving.
+    # a mathematical problem. Transfer and timing are also solving targets.
+    targets = set(unit["evidence_targets"])
     return (
-        "independent" not in unit["evidence_targets"]
+        not targets.intersection({"independent", "transfer", "timed"})
         and event["activity"] in {"recall", "review"}
         and _unassisted_success(event)
+        and any(dimension in targets and _qualified_positive(event, dimension)
+                for dimension in _evidence_dimensions(event))
     )
+
+
+def _diagnosis_completion_success(event: dict[str, Any], unit: dict[str, Any]) -> bool:
+    if not _unit_review_success(event, unit):
+        return False
+    # Complete only work on a nominated, qualified target. One relevant
+    # solving target suffices; no single attempt must cover every dimension.
+    targets = set(unit["evidence_targets"])
+    relevant = targets.intersection({"independent", "transfer", "timed"}) or targets
+    return any(dimension in relevant and _qualified_positive(event, dimension)
+               for dimension in _evidence_dimensions(event))
 
 
 def _iso(value: datetime) -> str:
@@ -299,7 +313,7 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
                 if not matching:
                     warnings.append(f"Attempt {event['event_id']} cannot complete unmatched parent diagnosis {diagnosis_id}.")
                 for unit_id in sorted(matching):
-                    if not _unit_review_success(event, units[unit_id]):
+                    if not _diagnosis_completion_success(event, units[unit_id]):
                         continue
                     key = (diagnosis_id, unit_id)
                     completed_variants[key] = max(

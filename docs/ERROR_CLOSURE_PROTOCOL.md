@@ -46,7 +46,11 @@
 
 完成诊断任务还必须匹配已出现、未 rejected 的父诊断和实际受测单元。只带 parent_diagnosis_id 不构成完成证据；同一单元的 explain 正确不能替代独立求解。孤立或跨单元父引用保留历史事件，但输出警告且不关闭诊断。
 
-明确没有 independent 目标的回忆单元，可以用无提示、过程可核查的 recall/review 完成对应检索任务，不增加独立解题计数。错题、部分作答、猜测、不确定或过程缺失需要即时核验；recommended_review_at 不能把这些问题推迟到任意未来。辅助正确仍需次日确认。
+回忆单元必须同时没有 independent、transfer、timed 求解目标，才能用无提示、过程可核查且实际覆盖检索目标的 recall/review 完成对应任务，不增加独立解题计数。仅有 delayed 目标时，没有 delayed_days 的近期回忆不能替代延迟检索。
+
+诊断任务完成还需本次 activity 实际提名且合格的维度匹配单元目标；含求解目标时至少匹配其中一个。transfer-only 需合格 variant；timed-only 需独立、过程清楚且有实测 time_minutes 的 timed_practice。不能仅凭 activity 或缺少 independent 目标关闭任务；一次作答也不必覆盖全部目标。其他真实独立成功仍计入独立证据并安排复习，但不能关闭不匹配的诊断目标。任务完成不修改 confirmed 诊断，不宣称延迟稳定修复或达到考试速度标准。
+
+错题、部分作答、猜测、不确定或过程缺失需要即时核验；recommended_review_at 不能把这些问题推迟到任意未来。辅助正确仍需次日确认。
 
 诊断尽量区分：
 
