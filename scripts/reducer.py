@@ -149,7 +149,7 @@ def _queue_task(
     diagnosis_id: str | None = None,
     error_tags: list[str] | None = None,
 ) -> None:
-    suffix = diagnosis_id or unit["unit_id"]
+    suffix = f"{diagnosis_id}:{unit['unit_id']}" if diagnosis_id else unit["unit_id"]
     task_id = f"{kind}:{suffix}"
     queue[task_id] = {
         "task_id": task_id,
@@ -173,7 +173,7 @@ def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any]
         for key in (f"diagnostic:{unit_id}", f"correction:{unit_id}"):
             queue.pop(key, None)
         if attempt.get("parent_diagnosis_id"):
-            queue.pop(f"targeted_variant:{attempt['parent_diagnosis_id']}", None)
+            queue.pop(f"targeted_variant:{attempt['parent_diagnosis_id']}:{unit_id}", None)
         _queue_task(queue, unit, event, "review", "delayed confirmation after clean independent success", _review_time(event))
         return
     if attempt["result"] != "correct":
@@ -184,11 +184,15 @@ def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any]
 
 def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     registry = registry or {}
-    ordered = sorted(events, key=lambda item: (parse_datetime(item["timestamp"]), item["event_id"]))
+    # Stable sorting preserves append order for revisions at the same instant.
+    ordered = sorted(events, key=lambda item: parse_datetime(item["timestamp"]))
     units: dict[str, dict[str, Any]] = {}
     diagnoses: dict[str, dict[str, Any]] = {}
     queue: dict[str, dict[str, Any]] = {}
-    completed_variants: dict[str, datetime] = {}
+    completed_variants: dict[tuple[str, str], tuple[datetime, int]] = {}
+    event_order = {event["event_id"]: (parse_datetime(event["timestamp"]), index) for index, event in enumerate(ordered)}
+    minimum_order = (datetime.min.replace(tzinfo=timezone.utc), -1)
+    attempt_questions: dict[str, str] = {}
     warnings: list[str] = []
 
     for unit_id, spec in sorted(registry.items()):
@@ -203,6 +207,7 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
                 raise ValueError(f"unit {unit_id} appears under multiple subjects")
         if event["event_type"] == "attempt":
             attempt = event["attempt"]
+            attempt_questions[event["event_id"]] = attempt["question_id"]
             if (
                 attempt.get("parent_diagnosis_id")
                 and attempt["result"] == "correct"
@@ -211,10 +216,12 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
                 and attempt["assistance_level"] == 0
             ):
                 diagnosis_id = attempt["parent_diagnosis_id"]
-                completed_variants[diagnosis_id] = max(
-                    completed_variants.get(diagnosis_id, datetime.min.replace(tzinfo=timezone.utc)),
-                    parse_datetime(event["timestamp"]),
-                )
+                for unit_id in event["unit_ids"]:
+                    key = (diagnosis_id, unit_id)
+                    completed_variants[key] = max(
+                        completed_variants.get(key, minimum_order),
+                        event_order[event["event_id"]],
+                    )
             for unit_id in event["unit_ids"]:
                 unit = units[unit_id]
                 unit["attempts"]["total"] += 1
@@ -248,28 +255,41 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
 
     error_patterns: dict[str, dict[str, Any]] = defaultdict(lambda: {"count": 0, "diagnosis_ids": [], "unit_ids": [], "subjects": []})
     for diagnosis_id, diagnosis in sorted(diagnoses.items()):
-        task_key = f"targeted_variant:{diagnosis_id}"
-        if diagnosis["status"] != "confirmed":
-            queue.pop(task_key, None)
+        if diagnosis["status"] == "rejected":
             continue
-        tags = diagnosis.get("error_tags") or ["unclassified"]
-        for tag in tags:
-            pattern = error_patterns[tag]
-            pattern["count"] += 1
-            pattern["diagnosis_ids"].append(diagnosis_id)
-            pattern["unit_ids"] = sorted(set(pattern["unit_ids"]) | set(diagnosis["unit_ids"]))
-            pattern["subjects"] = sorted(set(pattern["subjects"]) | {diagnosis["subject"]})
+        confirmed = diagnosis["status"] == "confirmed"
+        tags = (diagnosis.get("error_tags") or ["unclassified"]) if confirmed else []
+        if confirmed:
+            for tag in tags:
+                pattern = error_patterns[tag]
+                pattern["count"] += 1
+                pattern["diagnosis_ids"].append(diagnosis_id)
+                pattern["unit_ids"] = sorted(set(pattern["unit_ids"]) | set(diagnosis["unit_ids"]))
+                pattern["subjects"] = sorted(set(pattern["subjects"]) | {diagnosis["subject"]})
         for unit_id in diagnosis["unit_ids"]:
             unit = units[unit_id]
+            # Replace only the generic task for this diagnosed attempt, leaving
+            # unrelated attempts and other diagnoses on the same unit intact.
+            for kind in ("correction", "diagnostic"):
+                key = f"{kind}:{unit_id}"
+                task = queue.get(key)
+                if task and (
+                    task["source_event_id"] in diagnosis.get("evidence_refs", [])
+                    or (
+                        attempt_questions.get(task["source_event_id"]) == diagnosis["question_id"]
+                        and event_order[task["source_event_id"]] <= event_order[diagnosis["event_id"]]
+                    )
+                ):
+                    queue.pop(key)
             event_stub = {"event_id": diagnosis["event_id"]}
-            if completed_variants.get(diagnosis_id, datetime.min.replace(tzinfo=timezone.utc)) >= parse_datetime(diagnosis["timestamp"]):
+            if completed_variants.get((diagnosis_id, unit_id), minimum_order) >= event_order[diagnosis["event_id"]]:
                 continue
             _queue_task(
                 queue,
                 unit,
                 event_stub,
-                "targeted_variant",
-                diagnosis.get("next_action", "verify confirmed diagnosis with a targeted variant"),
+                "targeted_variant" if confirmed else "diagnostic",
+                diagnosis.get("next_action", "verify confirmed diagnosis with a targeted variant" if confirmed else "check the unresolved diagnosis without assuming a confirmed error"),
                 parse_datetime(diagnosis["timestamp"]),
                 diagnosis_id=diagnosis_id,
                 error_tags=tags,

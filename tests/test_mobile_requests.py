@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
-from scripts.process_inbox import process_file
+from scripts import process_inbox
+from scripts.process_inbox import main, process_file
 
 
 def event(event_id: str, *, subject: str = "math") -> dict:
@@ -149,6 +153,94 @@ class MobileRequestTests(unittest.TestCase):
 
         self.assertEqual(response["status"], "pending")
         self.assertTrue((root / "config" / "personal" / "project_change_requests.jsonl").exists())
+
+    def test_failed_state_rebuild_does_not_append_an_event(self):
+        root = self.make_vault()
+        registry_path = root / "state" / "knowledge_units.json"
+        registry_path.write_text(json.dumps({"schema_version": "1.0", "units": [{
+            "schema_version": "1.0", "unit_id": "math.sample.unit",
+            "subject": "english", "title": "Fictional mismatched registry",
+        }]}), encoding="utf-8")
+        before = registry_path.read_bytes()
+        req = request("mobile-demo-conflict", "record_attempt", {"event": event("conflict-001")})
+
+        response = process_file(root, self.write_request(root, req))
+
+        self.assertEqual(response["status"], "failed")
+        self.assertFalse((root / "events" / "learning_events.jsonl").exists())
+        self.assertEqual(registry_path.read_bytes(), before)
+
+    def test_failed_export_does_not_leave_archived_evidence(self):
+        root = self.make_vault()
+        req = request("mobile-demo-export-failure", "record_attempt", {"event": event("export-failure-001")})
+        with patch("scripts.process_inbox._refresh_exports", side_effect=OSError("Fictional write failure")):
+            response = process_file(root, self.write_request(root, req))
+        self.assertEqual(response["status"], "failed")
+        self.assertFalse((root / "events" / "learning_events.jsonl").exists())
+
+    def test_failed_unit_registration_does_not_change_registry(self):
+        root = self.make_vault()
+        existing = event("prior-001", subject="english")
+        existing["unit_ids"] = ["math.sample.unit"]
+        (root / "events" / "learning_events.jsonl").write_text(json.dumps(existing) + "\n", encoding="utf-8")
+        registry_path = root / "state" / "knowledge_units.json"
+        before = registry_path.read_bytes()
+        unit = {"schema_version": "1.0", "unit_id": "math.sample.unit", "subject": "math", "title": "Fictional unit"}
+        req = request("mobile-demo-register-failure", "register_unit", {"unit": unit})
+
+        response = process_file(root, self.write_request(root, req))
+
+        self.assertEqual(response["status"], "failed")
+        self.assertEqual(registry_path.read_bytes(), before)
+
+    def test_malformed_inbox_does_not_block_later_valid_requests(self):
+        root = self.make_vault()
+        (root / "inbox" / "000-malformed.json").write_text("{broken", encoding="utf-8")
+        good = request("mobile-demo-after-malformed", "record_attempt", {"event": event("after-malformed-001")})
+        self.write_request(root, good)
+
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = main(["--vault-root", str(root)])
+
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(json.loads((root / "outbox" / f"{good['request_id']}.json").read_text())["status"], "succeeded")
+        responses = json.loads(output.getvalue())["responses"]
+        self.assertEqual([item["status"] for item in responses], ["failed", "succeeded"])
+
+    def test_receipt_publication_failure_restores_existing_outputs(self):
+        root = self.make_vault()
+        seed = request("mobile-demo-seed", "record_attempt", {"event": event("seed-001")})
+        self.assertEqual(process_file(root, self.write_request(root, seed))["status"], "succeeded")
+        before = {relative: (root / relative).read_bytes() for relative in process_inbox.DURABLE_OUTPUTS if (root / relative).exists()}
+        req = request("mobile-demo-publish-failure", "record_attempt", {"event": event("publish-failure-001")})
+        receipt_path = root / "outbox" / f"{req['request_id']}.json"
+        atomic_write = process_inbox._write_bytes_atomic
+
+        def fail_receipt(path, content):
+            if path == receipt_path:
+                raise OSError("Fictional receipt publication failure")
+            atomic_write(path, content)
+
+        with patch("scripts.process_inbox._write_bytes_atomic", side_effect=fail_receipt):
+            response = process_file(root, self.write_request(root, req))
+
+        self.assertEqual(response["status"], "failed")
+        self.assertEqual(json.loads(receipt_path.read_text())["status"], "failed")
+        for relative, original in before.items():
+            self.assertEqual((root / relative).read_bytes(), original, str(relative))
+
+    def test_invalid_enum_is_a_file_failure_and_does_not_block_the_inbox(self):
+        root = self.make_vault()
+        bad = request("000-invalid-operation", "record_attempt", {})
+        bad["operation"] = []
+        self.write_request(root, bad)
+        good = request("mobile-demo-after-invalid-enum", "record_attempt", {"event": event("after-invalid-enum-001")})
+        self.write_request(root, good)
+        with redirect_stdout(io.StringIO()):
+            exit_code = main(["--vault-root", str(root)])
+        self.assertEqual(exit_code, 2)
+        self.assertTrue((root / "outbox" / f"{good['request_id']}.json").exists())
 
 
 if __name__ == "__main__":

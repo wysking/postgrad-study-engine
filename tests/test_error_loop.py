@@ -193,6 +193,71 @@ class ReducerTests(unittest.TestCase):
         self.assertIn("review", [task["task_type"] for task in state["review_queue"]])
         self.assertGreater(state["units"][UNIT]["mastery"]["transfer"], 0.5)
 
+    def test_equal_timestamp_revision_keeps_ledger_order(self):
+        timestamp = "2026-08-10T09:00:00+08:00"
+        proposed = diagnosis_event("z-prior", timestamp, "hypothesized")
+        confirmed = diagnosis_event("a-revision", timestamp, "confirmed", supersedes="z-prior")
+
+        state = rebuild_state([proposed, confirmed])
+
+        self.assertEqual(state["diagnoses"]["diag-limit-001"]["status"], "confirmed")
+        self.assertIn("condition-check.equivalent-infinitesimal", state["error_patterns"])
+
+    def test_unresolved_diagnoses_on_one_unit_remain_visible(self):
+        diagnoses = []
+        for index in range(3):
+            item = diagnosis_event(f"d{index}", f"2026-08-10T09:0{index}:00+08:00", "hypothesized")
+            item["diagnosis"]["diagnosis_id"] = f"diag-demo-{index}"
+            item["diagnosis"]["next_action"] = f"Check fictional divergence {index}."
+            diagnoses.append(item)
+
+        state = rebuild_state(diagnoses)
+
+        self.assertEqual(state["error_patterns"], {})
+        self.assertEqual({task["diagnosis_id"] for task in state["review_queue"]}, {f"diag-demo-{index}" for index in range(3)})
+        capsule = build_context_capsule(state)
+        for index in range(3):
+            self.assertIn(f"Check fictional divergence {index}.", capsule)
+
+    def test_unrelated_success_does_not_close_another_diagnosis(self):
+        proposed = diagnosis_event("d1", "2026-08-10T09:00:00+08:00", "hypothesized")
+        unrelated = attempt_event("a1", "2026-08-10T09:30:00+08:00")
+        state = rebuild_state([proposed, unrelated])
+        self.assertIn("diag-limit-001", {task["diagnosis_id"] for task in state["review_queue"]})
+
+        targeted = attempt_event("v1", "2026-08-10T09:30:00+08:00", activity="variant", parent_diagnosis_id="diag-limit-001")
+        state = rebuild_state([proposed, targeted])
+        self.assertNotIn("diag-limit-001", {task["diagnosis_id"] for task in state["review_queue"]})
+        self.assertEqual(state["error_patterns"], {})
+
+    def test_multi_unit_diagnosis_has_separate_completion_per_unit(self):
+        other_unit = "math.calculus.limit.definition"
+        confirmed = diagnosis_event("d1", "2026-08-10T09:00:00+08:00", "confirmed")
+        confirmed["unit_ids"].append(other_unit)
+        variant = attempt_event("v1", "2026-08-10T09:30:00+08:00", activity="variant", parent_diagnosis_id="diag-limit-001")
+
+        initial = rebuild_state([confirmed])
+        self.assertEqual(len(initial["review_queue"]), 2)
+        state = rebuild_state([confirmed, variant])
+        remaining = [task for task in state["review_queue"] if task["task_type"] == "targeted_variant"]
+        self.assertEqual([task["unit_id"] for task in remaining], [other_unit])
+
+    def test_closed_diagnosis_does_not_hide_a_later_failure_on_the_same_question(self):
+        confirmed = diagnosis_event("d1", "2026-08-10T09:00:00+08:00", "confirmed")
+        variant = attempt_event("v1", "2026-08-10T09:30:00+08:00", activity="variant", parent_diagnosis_id="diag-limit-001")
+        recurrence = attempt_event("a2", "2026-08-11T09:00:00+08:00", result="incorrect")
+        state = rebuild_state([confirmed, variant, recurrence])
+        corrections = [task for task in state["review_queue"] if task["task_type"] == "correction"]
+        self.assertEqual([task["source_event_id"] for task in corrections], ["a2"])
+
+    def test_variant_before_equal_timestamp_revision_does_not_close_it(self):
+        timestamp = "2026-08-10T09:00:00+08:00"
+        proposed = diagnosis_event("d1", timestamp, "hypothesized")
+        variant = attempt_event("v1", timestamp, activity="variant", parent_diagnosis_id="diag-limit-001")
+        revision = diagnosis_event("d2", timestamp, "confirmed", supersedes="d1")
+        state = rebuild_state([proposed, variant, revision])
+        self.assertIn("targeted_variant", [task["task_type"] for task in state["review_queue"]])
+
     def test_state_rebuild_is_deterministic_and_capsule_is_compact(self):
         events = [
             attempt_event("e2", "2026-08-11T09:00:00+08:00", result="incorrect", confidence_before=0.9),

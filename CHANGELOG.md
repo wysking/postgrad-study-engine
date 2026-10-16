@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Stage each mobile operation before publishing durable outputs and its receipt; restore prior files on caught publication failures.
+- Continue processing independent inbox files after an invalid JSON/envelope, while reporting a file failure without inventing a receipt.
+- Keep each unresolved diagnosis visible in the review queue without adding it to confirmed error statistics.
+- Preserve ledger order for equal-timestamp diagnosis revisions and track targeted completion per knowledge unit.
+- Keep event schema 1.0; diagnosis task IDs now include the unit ID. A reviewed release and separate Vault lock upgrade are required before production adoption.
+
 ## v0.3.0 - 2026-09-20
 
 - Established the public Core boundary.
