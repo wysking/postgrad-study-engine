@@ -7,8 +7,9 @@ Reusable Core for evidence-based study systems. The repository contains:
 - a structured `inbox/<request_id>.json` → `outbox/<request_id>.json` integration for a private Vault;
 - teaching and error-closure protocols, blank templates, fictional examples, tests, and CI.
 
-This branch prepares v0.3.1 for review. The published release remains v0.3.0
-until the release gates in [the review note](docs/RELEASE_REVIEW_0_3_1.md) pass.
+Version v0.3.1 provides the reliability changes described in
+[the release review](docs/RELEASE_REVIEW_0_3_1.md). The actual release/tag proves
+publication; each Vault's exact engine lock determines its adopted runtime.
 
 The Core contains no learner data. A private Vault supplies its own profile, subjects, events, state, schedule configuration, and engine lock at runtime. The Core is checked out at the exact commit recorded by the Vault; changing that lock is a reviewed upgrade, not an automatic production mutation.
 
