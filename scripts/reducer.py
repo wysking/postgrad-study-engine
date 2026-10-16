@@ -6,11 +6,75 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from scripts.contracts import parse_datetime, validate_knowledge_unit
+from scripts.contracts import parse_datetime, validate_event_sequence, validate_knowledge_unit
 
 
-MODEL_VERSION = "heuristic-evidence-0.1"
+MODEL_VERSION = "heuristic-evidence-0.2"
 DIMENSIONS = ("comprehension", "recall", "independent", "transfer", "delayed", "timed")
+SOLVING_ACTIVITIES = {"solve", "variant", "timed_practice"}
+
+
+def _unassisted_success(event: dict[str, Any]) -> bool:
+    attempt = event["attempt"]
+    return (
+        attempt["result"] == "correct"
+        and attempt["answer_mode"] in {"independent", "recalled"}
+        and attempt["process_check"] == "clean"
+        and attempt["assistance_level"] == 0
+    )
+
+
+def _clean_independent_success(event: dict[str, Any]) -> bool:
+    return (
+        _unassisted_success(event)
+        and event["attempt"]["answer_mode"] == "independent"
+        and event["activity"] in SOLVING_ACTIVITIES
+    )
+
+
+def _qualified_positive(event: dict[str, Any], dimension: str) -> bool:
+    """Activity nominates a dimension; observable response fields qualify it."""
+    attempt = event["attempt"]
+    if dimension == "comprehension":
+        # Supported explanations retain value without claiming independence.
+        return (
+            attempt["result"] == "correct"
+            and attempt["answer_mode"] != "guess"
+            and attempt["process_check"] == "clean"
+        )
+    if dimension in {"independent", "transfer", "timed"}:
+        return _clean_independent_success(event) and (
+            dimension != "timed" or "time_minutes" in attempt
+        )
+    if dimension == "delayed" and event["activity"] in SOLVING_ACTIVITIES:
+        return _clean_independent_success(event)
+    return _unassisted_success(event)
+
+
+def _unit_review_success(event: dict[str, Any], unit: dict[str, Any]) -> bool:
+    if _clean_independent_success(event):
+        return True
+    # A recall-only unit can close retrieval work without pretending it solved
+    # a mathematical problem. Transfer and timing are also solving targets.
+    targets = set(unit["evidence_targets"])
+    return (
+        not targets.intersection({"independent", "transfer", "timed"})
+        and event["activity"] in {"recall", "review"}
+        and _unassisted_success(event)
+        and any(dimension in targets and _qualified_positive(event, dimension)
+                for dimension in _evidence_dimensions(event))
+    )
+
+
+def _diagnosis_completion_success(event: dict[str, Any], unit: dict[str, Any]) -> bool:
+    if not _unit_review_success(event, unit):
+        return False
+    # Complete only work on a nominated, qualified target. One relevant
+    # solving target suffices; no single attempt must cover every dimension.
+    targets = set(unit["evidence_targets"])
+    relevant = targets.intersection({"independent", "transfer", "timed"}) or targets
+    return any(dimension in relevant and _qualified_positive(event, dimension)
+               for dimension in _evidence_dimensions(event))
 
 
 def _iso(value: datetime) -> str:
@@ -48,6 +112,9 @@ def _new_unit_state(unit_id: str, subject: str, registry: dict[str, dict[str, An
         "evidence_targets": list(spec.get("evidence_targets", DIMENSIONS)),
         "mastery": {},
         "evidence_counts": {dimension: 0 for dimension in DIMENSIONS},
+        "qualified_positive_counts": {dimension: 0 for dimension in DIMENSIONS},
+        "_independent_questions": set(),
+        "_unassisted_successes": 0,
         "attempts": {"total": 0, "correct": 0, "partial": 0, "incorrect": 0, "unanswered": 0},
         "clean_independent_correct": 0,
         "flagged_correct": 0,
@@ -67,7 +134,7 @@ def _evidence_dimensions(event: dict[str, Any]) -> list[str]:
         dimensions.append("comprehension")
     if activity in {"recall", "review"}:
         dimensions.append("recall")
-    if activity in {"solve", "timed_practice"}:
+    if activity in SOLVING_ACTIVITIES:
         dimensions.append("independent")
     if activity == "variant":
         dimensions.append("transfer")
@@ -101,30 +168,55 @@ def _update_mastery(unit: dict[str, Any], event: dict[str, Any]) -> None:
     for dimension in dimensions:
         old = float(unit["mastery"].get(dimension, 0.5))
         if positive:
-            new = old + alpha * (1.0 - old)
+            qualified = _qualified_positive(event, dimension)
+            new = old + alpha * (1.0 - old) if qualified else old
+            if qualified:
+                unit["qualified_positive_counts"][dimension] += 1
         else:
+            # Preserve failures, including their original assistance context.
             new = old * (1.0 - alpha)
         unit["mastery"][dimension] = round(max(0.0, min(1.0, new)), 4)
         unit["evidence_counts"][dimension] += 1
 
-    targets = [target for target in unit["evidence_targets"] if target in unit["mastery"]]
-    if targets:
+    if _unassisted_success(event):
+        unit["_unassisted_successes"] += 1
+    if _clean_independent_success(event):
+        unit["_independent_questions"].add(attempt["question_id"])
+    targets = unit["evidence_targets"]
+    observed = [target for target in targets if unit["evidence_counts"][target]]
+    supported = [target for target in targets if unit["qualified_positive_counts"][target]]
+    repeated = (
+        len(unit["_independent_questions"]) >= 2 if "independent" in targets
+        else unit["_unassisted_successes"] >= 2
+    )
+    sufficient = len(supported) == len(targets) and repeated
+    unit["evidence_coverage"] = {
+        "observed_targets": observed,
+        "supported_targets": supported,
+        "missing_targets": [target for target in targets if target not in observed],
+        "unverified_targets": [target for target in observed if target not in supported],
+        "independent_questions": len(unit["_independent_questions"]),
+        "sufficient_for_overall": sufficient,
+    }
+    if sufficient:
         unit["mastery_overall"] = round(sum(unit["mastery"][key] for key in targets) / len(targets), 4)
     else:
         unit["mastery_overall"] = None
 
 
 def _review_time(event: dict[str, Any]) -> datetime:
-    if event.get("recommended_review_at"):
-        return parse_datetime(event["recommended_review_at"], "recommended_review_at")
     attempt = event["attempt"]
     timestamp = parse_datetime(event["timestamp"])
     if attempt["result"] != "correct":
         return timestamp
-    if attempt["answer_mode"] in {"guess", "uncertain"} or attempt["process_check"] == "suspicious":
+    if attempt["answer_mode"] in {"guess", "uncertain"} or attempt["process_check"] != "clean":
         return timestamp
-    if attempt["assistance_level"] > 0:
+    if attempt["assistance_level"] > 0 or attempt["answer_mode"] == "assisted":
         return timestamp + timedelta(days=1)
+    if not _clean_independent_success(event) and event["activity"] not in {"recall", "review"}:
+        return timestamp
+    if event.get("recommended_review_at"):
+        return max(timestamp, parse_datetime(event["recommended_review_at"], "recommended_review_at"))
     if attempt.get("variant_level") == "isomorphic":
         return timestamp + timedelta(days=3)
     if attempt.get("variant_level") in {"near_transfer", "boundary"}:
@@ -169,12 +261,12 @@ def _queue_task(
 def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any], event: dict[str, Any]) -> None:
     attempt = event["attempt"]
     unit_id = unit["unit_id"]
-    if attempt["result"] == "correct" and attempt["answer_mode"] == "independent" and attempt["process_check"] == "clean":
+    if _unit_review_success(event, unit):
         for key in (f"diagnostic:{unit_id}", f"correction:{unit_id}"):
             queue.pop(key, None)
-        if attempt.get("parent_diagnosis_id"):
-            queue.pop(f"targeted_variant:{attempt['parent_diagnosis_id']}:{unit_id}", None)
-        _queue_task(queue, unit, event, "review", "delayed confirmation after clean independent success", _review_time(event))
+        # Diagnosis-specific work is rebuilt from validated per-unit
+        # completions below, not cleared by the presence of a parent string.
+        _queue_task(queue, unit, event, "review", "delayed confirmation after qualified unassisted success", _review_time(event))
         return
     if attempt["result"] != "correct":
         _queue_task(queue, unit, event, "correction", "incorrect or incomplete attempt needs diagnosis and correction", _review_time(event))
@@ -184,6 +276,8 @@ def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any]
 
 def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     registry = registry or {}
+    # Direct callers have the same per-event boundary as inbox/ledger readers.
+    validate_event_sequence(events)
     # Stable sorting preserves append order for revisions at the same instant.
     ordered = sorted(events, key=lambda item: parse_datetime(item["timestamp"]))
     units: dict[str, dict[str, Any]] = {}
@@ -208,15 +302,18 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
         if event["event_type"] == "attempt":
             attempt = event["attempt"]
             attempt_questions[event["event_id"]] = attempt["question_id"]
-            if (
-                attempt.get("parent_diagnosis_id")
-                and attempt["result"] == "correct"
-                and attempt["answer_mode"] == "independent"
-                and attempt["process_check"] == "clean"
-                and attempt["assistance_level"] == 0
-            ):
+            if attempt.get("parent_diagnosis_id"):
                 diagnosis_id = attempt["parent_diagnosis_id"]
-                for unit_id in event["unit_ids"]:
+                parent = diagnoses.get(diagnosis_id)
+                matching = (
+                    set(event["unit_ids"]) & set(parent["unit_ids"])
+                    if parent and parent["status"] != "rejected" else set()
+                )
+                if not matching:
+                    warnings.append(f"Attempt {event['event_id']} cannot complete unmatched parent diagnosis {diagnosis_id}.")
+                for unit_id in sorted(matching):
+                    if not _diagnosis_completion_success(event, units[unit_id]):
+                        continue
                     key = (diagnosis_id, unit_id)
                     completed_variants[key] = max(
                         completed_variants.get(key, minimum_order),
@@ -226,7 +323,7 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
                 unit = units[unit_id]
                 unit["attempts"]["total"] += 1
                 unit["attempts"][attempt["result"]] += 1
-                if attempt["result"] == "correct" and attempt["answer_mode"] == "independent" and attempt["process_check"] == "clean" and attempt["assistance_level"] == 0:
+                if _clean_independent_success(event):
                     unit["clean_independent_correct"] += 1
                 elif attempt["result"] == "correct":
                     unit["flagged_correct"] += 1
@@ -273,7 +370,7 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
             for kind in ("correction", "diagnostic"):
                 key = f"{kind}:{unit_id}"
                 task = queue.get(key)
-                if task and (
+                if task and event_order[task["source_event_id"]] <= event_order[diagnosis["event_id"]] and (
                     task["source_event_id"] in diagnosis.get("evidence_refs", [])
                     or (
                         attempt_questions.get(task["source_event_id"]) == diagnosis["question_id"]
@@ -296,6 +393,8 @@ def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, An
             )
 
     for unit in units.values():
+        del unit["_independent_questions"]
+        del unit["_unassisted_successes"]
         samples = unit["confidence"]["samples"]
         unit["confidence"]["mean_absolute_error"] = round(unit["confidence"]["absolute_error_sum"] / samples, 4) if samples else None
         del unit["confidence"]["absolute_error_sum"]

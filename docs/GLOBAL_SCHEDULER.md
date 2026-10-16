@@ -30,6 +30,8 @@
 
 权重位于 `config/scheduler.json`。这些值是启发式决策参数，不是经过个人数据校准的提分概率。后续应使用真实章节测试、延迟复测和模拟卷结果校准。
 
+`model_version` 标识实际运行的调度器（`constrained-priority-0.2`）；调用方配置中的版本标签另记为 `config_model_version`。旧配置仍可使用，评分公式与权重未改变。
+
 调度器、记忆模型和 FSRS 接入的升级路线见 `MEMORY_AND_SCHEDULING_MODEL_ROADMAP.md`。不得为了使用复杂模型而绕过数据条件、验证计划或可解释基线。
 
 ## Constraints
@@ -42,6 +44,11 @@
 - `fatigue_budget` 可选；未提供时疲劳作为软惩罚。
 - `subject_activation` 可由 Vault 配置提供；在激活时间之前，候选会以 `subject_not_active` 排除。
 - 任务不可切分，因此可能留下少量无法填充的时间。
+- 带 `due_at` 的 `review`、`diagnostic`、`correction`、`targeted_variant` 只在到期时或之后入选，比较实际带时区的时间点。未来 review 返回 `review_not_due`，未来核验返回 `check_not_due`；辅助正确产生的次日确认不得当日入选。提前练习应明确作为 `practice`，不能据此声称完成延迟确认或延迟保持；排程不移除原队列。
+- 同一单元的通用 `correction` / `diagnostic` 每次计划最多选择一项；保留其余队列和排除原因。具体诊断不因共享单元而合并。
+- 调用方提供的 `learn` / `practice` / `timed_practice` 若对应已登记单元，同样检查登记的先修条件，不能用 `prerequisite_ready: true` 覆盖。纠错和诊断可用于探测先修不足。
+- 没有登记的外部单元仍依赖调用方提供的资格判断；调度器不能推断不存在的知识关系。
+- 候选引用已登记单元时，subject 必须与当前单元关系一致，否则以 `unit_subject_mismatch` 排除。先核对身份，再执行学科阶段、激活和时间分配限制；不自动改标签，也不推断未知单元的学科关系。
 
 ## Usage
 

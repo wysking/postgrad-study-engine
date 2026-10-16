@@ -49,6 +49,13 @@
   },
   "allOf": [
     {
+      "if": {
+        "required": ["attempt"],
+        "properties": {"attempt": {"required": ["answer_mode"], "properties": {"answer_mode": {"const": "independent"}}}}
+      },
+      "then": {"properties": {"attempt": {"properties": {"assistance_level": {"const": 0}}}}}
+    },
+    {
       "if": {"properties": {"event_type": {"const": "attempt"}}},
       "then": {"required": ["activity", "attempt"], "not": {"required": ["diagnosis"]}}
     },

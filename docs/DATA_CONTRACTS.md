@@ -25,6 +25,10 @@ materials.diffusion.ficks_first_law
 
 事件账本默认位于 `events/learning_events.jsonl`，每行一个 JSON 对象。写入前执行完整校验和重复 ID 检查。诊断状态变化追加新事件，不修改历史行。
 
+追加时保留原文件字节前缀，包括合法 BOM、CRLF、空白和旧行格式；必要时仅补行分隔符，再写新事件。直接 reducer 调用同样检查事件身份及合法诊断修订链。estimated_minutes 必须是真正整数，不能使用 Python 中可被当作整数的布尔值。契约原已无效的数据若被发现则明确失败，不静默清洗历史。
+
+新 confirmed/draft_check 的来源门槛见 ERROR_CLOSURE_PROTOCOL。它只校验本次待追加事件，不让新写入策略使旧版合法历史无法读取；也不重新判定已存历史或把自由文字当作真实核查证明。
+
 常用命令：
 
 ```powershell
@@ -47,7 +51,13 @@ python -m scripts.build_context_capsule
 - 仅基于 confirmed 诊断的错误模式；
 - 纠错、鉴别、变式和延迟复习队列。
 
-当前 mastery 数值是 `heuristic-evidence-0.1` 的可解释启发式摘要，不是校准后的掌握概率。未来更换模型时，旧事件保持不变，重新生成派生状态。
+当前未发布分支使用 heuristic-evidence-0.2。活动只提名维度：辅助、猜测、不确定或过程未核验的正确解题不能增加 independent、transfer 或 timed 正向能力；受支持的解释仍可以保留 comprehension 增量。错误与部分作答保留负向摘要、原结果和辅助条件，不删除失败证据。
+
+evidence_counts 仍统计观察，不是合格成功数量；新增派生 qualified_positive_counts 和 evidence_coverage 明确支持、未测及待核验目标。完整独立变式可以支持两个维度，但仍只有一条 attempt。没有实测用时的 timed_practice 不增加 timed 正向摘要。
+
+mastery_overall 在目标未全部得到合格正向证据时为 null；含 independent 目标时还要求至少两道不同题目的完整无提示成功，其他目标至少两次无提示成功。这是保守的摘要可用性门槛，不是统计可靠性或掌握声明。剩余未测迁移、延迟和速度仍保持未知，不能从活动名称补出成功。
+
+mastery 仍是启发式摘要，不是校准后的掌握概率。旧 1.0 事件保持不变；模型语义变化通过固定账本重放和独立 Core 发布审查，不通过改写历史实施。delayed_days 是输入声明的间隔，不是脚本已验证未再学习或未看答案的证明。
 
 ## Mobile Requests
 

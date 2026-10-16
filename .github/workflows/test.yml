@@ -9,7 +9,11 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -19,3 +23,42 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Validate empty demo ledger
         run: python -m scripts.validate_events
+
+  publish-v0-3-1:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-v0.3.1
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Publish only the authorized v0.3.1 release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          release_version=$(tr -d '\r\n' < VERSION)
+          if [[ "$release_version" != "0.3.1" ]]; then
+            echo "This job publishes only v0.3.1; skipping."
+            exit 0
+          fi
+          if gh release view v0.3.1 --json isDraft,isPrerelease --jq '.isDraft or .isPrerelease' > "$RUNNER_TEMP/release-v0.3.1-state"; then
+            if [[ "$(cat "$RUNNER_TEMP/release-v0.3.1-state")" != "false" ]]; then
+              echo "An existing non-final release requires review."
+              exit 1
+            fi
+            echo "v0.3.1 is already published; preserving its original tag and release."
+            exit 0
+          fi
+          if git show-ref --verify --quiet refs/tags/v0.3.1; then
+            echo "An existing tag without a final release requires review; refusing to overwrite it."
+            exit 1
+          fi
+          gh release create v0.3.1 --target "$GITHUB_SHA" --title "v0.3.1" --notes-file docs/RELEASE_NOTES_0_3_1.md

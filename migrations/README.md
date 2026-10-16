@@ -22,3 +22,48 @@ processing stages writes and rolls back caught publication failures; abrupt
 termination and multiple writers still require explicit operational controls.
 Publish a reviewed Core release first, then propose a separate lock-only Vault
 upgrade. Existing receipts retain their original version and status.
+
+## Unreleased evidence qualification
+
+heuristic-evidence-0.2 keeps event schema 1.0 and adds optional unit-level
+positive-evidence counts and coverage in rebuilt state. Overall summaries may
+now be null even when one dimension has observations. Consumers must keep
+unknown distinct from zero. Rebuild from the same ledger, compare outputs, and
+refresh schedules before a reviewed release and separate Vault lock upgrade.
+The two-success gate is a conservative reporting rule, not a calibrated mastery
+criterion. Changed evidence summaries can change derived candidate values;
+the separate eligibility change below leaves scoring weights unchanged.
+
+## Unreleased scheduling eligibility
+
+Review tasks with future due dates are excluded with `review_not_due`. Known
+unit prerequisites apply equally to external learning/practice candidates;
+remediation remains eligible to probe a gap. Generic correction/diagnostic
+checks share a per-unit session slot, but diagnosis-specific tasks and the
+underlying review queue are preserved. The score formula, weights and input
+schema are unchanged. Compare fixed-input plans before adopting these changed
+constraints; a different plan is not evidence of improved learning.
+Output `model_version` now identifies the executed `constrained-priority-0.2`
+implementation. The caller's existing label is retained separately in optional
+`config_model_version`; old personal configuration remains readable.
+
+## Explicit failed-request recovery
+
+Old receipts remain unchanged during ordinary replay. The optional single-file
+--retry-failed path can replace a reviewed same-ID/hash failed receipt only
+after its staged operation succeeds; the new receipt retains the complete prior
+failure under result.recovery. An existing event is reused only when its content
+matches exactly. Conflicts abort, and receipt publication failures roll back
+caught output changes. No production recovery or Vault workflow change is
+performed as part of this Core proposal.
+
+## Inbox writer guard
+
+`process_file` now serializes cooperating writers in one checkout. Contention
+fails before any operation receipt or durable learning output is written and
+can be retried with the same ID/hash. An untracked lock file remains after
+process exit; ownership resides in the operating system, not file existence.
+Do not delete it while processing. This cannot serialize independent runner
+checkouts or older/direct writers; a separately reviewed Vault workflow must
+provide cloud concurrency control. Crash-safe multi-file publication is still
+outside this release.

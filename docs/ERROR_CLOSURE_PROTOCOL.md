@@ -31,6 +31,8 @@
 
 草稿识别不清的位置必须列入 `transcription_uncertainty`，不能作为确认错因的唯一依据。
 
+新写入的 confirmed/draft_check 诊断若自身或所引事件标有识别不确定性，必须引用清晰、相关且不晚于本诊断的作答来核查，并覆盖全部受影响单元；同题或明确关联本 diagnosis_id 的作答才相关。无过程证据、未来作答或另一道无关题的成功不能解除该门槛。缺少核查时保留 hypothesized/unresolved，而不是编造 learner_verdict；修订仍追加事件。此为新写入检查，旧 1.0 账本继续可读，不回写或重分类旧诊断。文字真实性仍须交互层核查，脚本不根据关键词推断用户真实心理过程。
+
 ## Diagnosis State
 
 - `hypothesized`: Codex 或 learner 提出候选错因，不能进入长期错误统计。
@@ -43,6 +45,14 @@
 `hypothesized` 和 `unresolved` 的下一步仍进入按诊断、知识单元分别保留的鉴别队列，但不加入 confirmed 错误统计。同一单元的新题正确不能关闭其他诊断；清晰、独立且关联 `parent_diagnosis_id` 的成功才完成对应单元的复测任务，随后安排延迟复习。确认一次具体错误不等于已证实长期稳定错误模式。
 
 ## Error Structure
+
+完成诊断任务还必须匹配已出现、未 rejected 的父诊断和实际受测单元。只带 parent_diagnosis_id 不构成完成证据；同一单元的 explain 正确不能替代独立求解。孤立或跨单元父引用保留历史事件，但输出警告且不关闭诊断。
+
+回忆单元必须同时没有 independent、transfer、timed 求解目标，才能用无提示、过程可核查且实际覆盖检索目标的 recall/review 完成对应任务，不增加独立解题计数。仅有 delayed 目标时，没有 delayed_days 的近期回忆不能替代延迟检索。
+
+诊断任务完成还需本次 activity 实际提名且合格的维度匹配单元目标；含求解目标时至少匹配其中一个。transfer-only 需合格 variant；timed-only 需独立、过程清楚且有实测 time_minutes 的 timed_practice。不能仅凭 activity 或缺少 independent 目标关闭任务；一次作答也不必覆盖全部目标。其他真实独立成功仍计入独立证据并安排复习，但不能关闭不匹配的诊断目标。任务完成不修改 confirmed 诊断，不宣称延迟稳定修复或达到考试速度标准。
+
+错题、部分作答、猜测、不确定或过程缺失需要即时核验；recommended_review_at 不能把这些问题推迟到任意未来。辅助正确仍需次日确认。
 
 诊断尽量区分：
 

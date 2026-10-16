@@ -8,11 +8,13 @@ validation succeeds and an ``outbox/<request_id>.json`` receipt is written.
 from __future__ import annotations
 
 import argparse
+import errno
 import hashlib
 import json
 import os
 import shutil
 import tempfile
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -34,7 +36,7 @@ from scripts.reducer import build_context_capsule, load_units, rebuild_state
 from scripts.scheduler import build_schedule
 
 
-ENGINE_VERSION = "0.3.0"
+ENGINE_VERSION = "0.3.1"
 EVENTS_RELATIVE = Path("events") / "learning_events.jsonl"
 UNITS_RELATIVE = Path("state") / "knowledge_units.json"
 DERIVED_STATE_RELATIVE = Path("state") / "derived_state.json"
@@ -417,10 +419,44 @@ def _publish_outputs(vault_root: Path, staged_root: Path, request_id: str) -> No
         raise
 
 
-def process_file(vault_root: Path, request_path: Path) -> dict[str, Any]:
+@contextmanager
+def _vault_writer(vault_root: Path):
+    """Guard a checkout's read/stage/publish cycle with a kernel-held lock.
+
+    Keep the file inode after closing: deleting it would let a third writer
+    lock a new inode while another writer still holds the old one. Closing or
+    terminating the process releases ownership, even when the file remains.
+    Separate GitHub runner checkouts additionally need workflow concurrency.
+    """
+    with (vault_root / ".study-inbox.lock").open("a+b") as handle:
+        try:
+            if os.name == "nt":
+                import msvcrt
+                if handle.tell() == 0:
+                    handle.write(b"\0")
+                    handle.flush()
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as exc:
+            if exc.errno in {errno.EACCES, errno.EAGAIN}:
+                raise ContractError("another inbox writer is active for this Vault; retry the same request later") from exc
+            raise
+        yield
+
+
+def process_file(vault_root: Path, request_path: Path, *, retry_failed: bool = False) -> dict[str, Any]:
+    with _vault_writer(vault_root):
+        return _process_file_unlocked(vault_root, request_path, retry_failed=retry_failed)
+
+
+def _process_file_unlocked(vault_root: Path, request_path: Path, *, retry_failed: bool) -> dict[str, Any]:
     raw = load_json(request_path)
     request = validate_mobile_request(raw)
     receipt_path = vault_root / "outbox" / f"{request['request_id']}.json"
+    existing = None
     if receipt_path.exists():
         existing = load_json(receipt_path)
         if not isinstance(existing, dict) or existing.get("request_hash") != _request_hash(request):
@@ -428,7 +464,10 @@ def process_file(vault_root: Path, request_path: Path) -> dict[str, Any]:
         validate_mobile_response(existing)
         if existing["request_id"] != request["request_id"] or existing["operation"] != request["operation"]:
             raise ContractError("existing receipt does not match the request ID and operation")
-        return existing
+        if not retry_failed or existing["status"] != "failed":
+            return existing
+    elif retry_failed:
+        raise ContractError("retry_failed requires an existing same-ID failed receipt")
     try:
         with tempfile.TemporaryDirectory(prefix="study-request-", ignore_cleanup_errors=True) as temporary:
             staged_root = Path(temporary)
@@ -440,9 +479,19 @@ def process_file(vault_root: Path, request_path: Path) -> dict[str, Any]:
                     destination.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(source, destination)
             response = process_request(staged_root, request)
+            if existing is not None:
+                response.setdefault("result", {})["recovery"] = {
+                    "prior_failed_receipt": existing,
+                    "mode": "explicit_same_request_retry",
+                }
+                validate_mobile_response(response)
             _write_receipt(staged_root, request, response)
             _publish_outputs(vault_root, staged_root, request["request_id"])
     except (ContractError, OSError, ValueError) as exc:
+        if existing is not None:
+            # A failed recovery preserves the prior receipt; CLI reports this
+            # attempt's error without manufacturing a replacement success.
+            raise
         response = _response(request, "failed", error={"code": type(exc).__name__, "message": str(exc)})
         _write_receipt(vault_root, request, response)
     return response
@@ -452,7 +501,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--vault-root", type=Path, required=True)
     parser.add_argument("--request", type=Path, help="Process one request instead of all inbox/*.json files")
+    parser.add_argument("--retry-failed", action="store_true",
+                        help="Explicitly retry one reviewed same-ID/hash failed request; requires --request")
     args = parser.parse_args(argv)
+    if args.retry_failed and args.request is None:
+        parser.error("--retry-failed requires --request")
     paths = [args.request] if args.request else sorted((args.vault_root / "inbox").glob("*.json"))
     if not paths:
         print(json.dumps({"status": "idle", "processed": 0}, ensure_ascii=False))
@@ -460,7 +513,7 @@ def main(argv: list[str] | None = None) -> int:
     responses = []
     for path in paths:
         try:
-            responses.append(process_file(args.vault_root, path))
+            responses.append(process_file(args.vault_root, path, retry_failed=args.retry_failed))
         except (ContractError, OSError, ValueError) as exc:
             # An invalid envelope has no trustworthy ID/operation for a receipt.
             # Report the file failure and continue processing independent files.

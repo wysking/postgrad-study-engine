@@ -148,7 +148,7 @@ def validate_knowledge_unit(unit: Any) -> dict[str, Any]:
             _require_enum(target, EVIDENCE_TARGETS, "knowledge_unit.evidence_targets[]")
     if "exam_weight" in unit:
         _require_number(unit["exam_weight"], "knowledge_unit.exam_weight", 0, 1)
-    if "estimated_minutes" in unit and (not isinstance(unit["estimated_minutes"], int) or unit["estimated_minutes"] < 1):
+    if "estimated_minutes" in unit and (isinstance(unit["estimated_minutes"], bool) or not isinstance(unit["estimated_minutes"], int) or unit["estimated_minutes"] < 1):
         raise ContractError("knowledge_unit.estimated_minutes must be an integer >= 1")
     if unit.get("status", "active") not in {"active", "archived"}:
         raise ContractError("knowledge_unit.status must be active or archived")
@@ -312,7 +312,7 @@ def validate_attempt(attempt: Any) -> dict[str, Any]:
     _require_enum(attempt["result"], RESULTS, "attempt.result")
     _require_enum(attempt["answer_mode"], ANSWER_MODES, "attempt.answer_mode")
     _require_enum(attempt["process_check"], PROCESS_CHECKS, "attempt.process_check")
-    if not isinstance(attempt["assistance_level"], int) or not 0 <= attempt["assistance_level"] <= 5:
+    if isinstance(attempt["assistance_level"], bool) or not isinstance(attempt["assistance_level"], int) or not 0 <= attempt["assistance_level"] <= 5:
         raise ContractError("attempt.assistance_level must be an integer from 0 to 5")
     if "time_minutes" in attempt:
         _require_number(attempt["time_minutes"], "attempt.time_minutes", minimum=0.000001)
@@ -323,7 +323,7 @@ def validate_attempt(attempt: Any) -> dict[str, Any]:
         _require_enum(attempt["variant_level"], VARIANT_LEVELS, "attempt.variant_level")
         if "parent_diagnosis_id" not in attempt:
             raise ContractError("variant attempt needs parent_diagnosis_id")
-    if "delayed_days" in attempt and (not isinstance(attempt["delayed_days"], int) or attempt["delayed_days"] < 0):
+    if "delayed_days" in attempt and (isinstance(attempt["delayed_days"], bool) or not isinstance(attempt["delayed_days"], int) or attempt["delayed_days"] < 0):
         raise ContractError("attempt.delayed_days must be an integer >= 0")
     for key in ("evidence", "parent_diagnosis_id"):
         if key in attempt and (not isinstance(attempt[key], str) or not attempt[key].strip()):
@@ -408,6 +408,41 @@ def append_event_atomic(path: Path, event: dict[str, Any]) -> None:
     append_events_atomic(path, [event])
 
 
+def _validate_new_diagnosis_source(event: dict[str, Any], prior_events: list[dict[str, Any]]) -> None:
+    """Guard new ambiguous draft confirmations without invalidating legacy reads.
+
+    This verifies observable provenance conditions, not the truth of free text.
+    A clear corroboration must cover every affected unit on the same question
+    or explicitly belong to this diagnostic episode, and cannot be future data.
+    """
+    if event["event_type"] != "diagnosis":
+        return
+    diagnosis = event["diagnosis"]
+    if diagnosis["status"] != "confirmed" or diagnosis.get("confirmation_method") != "draft_check":
+        return
+    refs = set(diagnosis.get("evidence_refs", []))
+    cited = [item for item in prior_events if item["event_id"] in refs]
+    ambiguous = bool(event.get("transcription_uncertainty")) or any(
+        item.get("transcription_uncertainty") for item in cited
+    )
+    if not ambiguous:
+        return
+    covered: set[str] = set()
+    for item in cited:
+        if (item["event_type"] != "attempt" or item["subject"] != event["subject"]
+                or item.get("transcription_uncertainty")
+                or parse_datetime(item["timestamp"]) > parse_datetime(event["timestamp"])):
+            continue
+        attempt = item["attempt"]
+        matching = (attempt["question_id"] == diagnosis["question_id"]
+                    or attempt.get("parent_diagnosis_id") == diagnosis["diagnosis_id"])
+        if (matching and attempt["process_check"] != "not_available"
+                and (attempt.get("evidence", "").strip() or item.get("transcription", "").strip())):
+            covered.update(item["unit_ids"])
+    if not set(event["unit_ids"]).issubset(covered):
+        raise ContractError("ambiguous draft cannot confirm diagnosis without clear, related corroborating evidence; keep it hypothesized or unresolved")
+
+
 def append_events_atomic(path: Path, events: list[dict[str, Any]]) -> None:
     """Validate and append a batch without exposing a partially written ledger."""
     if not events:
@@ -416,12 +451,20 @@ def append_events_atomic(path: Path, events: list[dict[str, Any]]) -> None:
         validate_learning_event(event)
     existing = load_jsonl(path)
     validate_event_sequence(existing + events, validate_items=False)
+    prior = list(existing)
+    for event in events:
+        _validate_new_diagnosis_source(event, prior)
+        prior.append(event)
+    prefix = path.read_bytes() if path.exists() else b""
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
     try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-            for event in existing + events:
-                handle.write(json.dumps(event, ensure_ascii=False, separators=(",", ":")) + "\n")
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(prefix)
+            if prefix and not prefix.endswith((b"\n", b"\r")):
+                handle.write(b"\n")
+            for event in events:
+                handle.write((json.dumps(event, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8"))
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, path)
