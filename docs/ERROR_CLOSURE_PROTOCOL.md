@@ -31,6 +31,8 @@
 
 草稿识别不清的位置必须列入 `transcription_uncertainty`，不能作为确认错因的唯一依据。
 
+新写入的 confirmed/draft_check 诊断若自身或所引事件标有识别不确定性，必须引用清晰、相关且不晚于本诊断的作答来核查，并覆盖全部受影响单元；同题或明确关联本 diagnosis_id 的作答才相关。无过程证据、未来作答或另一道无关题的成功不能解除该门槛。缺少核查时保留 hypothesized/unresolved，而不是编造 learner_verdict；修订仍追加事件。此为新写入检查，旧 1.0 账本继续可读，不回写或重分类旧诊断。文字真实性仍须交互层核查，脚本不根据关键词推断用户真实心理过程。
+
 ## Diagnosis State
 
 - `hypothesized`: Codex 或 learner 提出候选错因，不能进入长期错误统计。

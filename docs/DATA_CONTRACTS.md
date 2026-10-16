@@ -25,6 +25,10 @@ materials.diffusion.ficks_first_law
 
 事件账本默认位于 `events/learning_events.jsonl`，每行一个 JSON 对象。写入前执行完整校验和重复 ID 检查。诊断状态变化追加新事件，不修改历史行。
 
+追加时保留原文件字节前缀，包括合法 BOM、CRLF、空白和旧行格式；必要时仅补行分隔符，再写新事件。直接 reducer 调用同样检查事件身份及合法诊断修订链。estimated_minutes 必须是真正整数，不能使用 Python 中可被当作整数的布尔值。契约原已无效的数据若被发现则明确失败，不静默清洗历史。
+
+新 confirmed/draft_check 的来源门槛见 ERROR_CLOSURE_PROTOCOL。它只校验本次待追加事件，不让新写入策略使旧版合法历史无法读取；也不重新判定已存历史或把自由文字当作真实核查证明。
+
 常用命令：
 
 ```powershell

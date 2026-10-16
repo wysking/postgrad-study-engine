@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from scripts.contracts import parse_datetime, validate_knowledge_unit, validate_learning_event
+from scripts.contracts import parse_datetime, validate_event_sequence, validate_knowledge_unit
 
 
 MODEL_VERSION = "heuristic-evidence-0.2"
@@ -277,8 +277,7 @@ def _handle_attempt_queue(queue: dict[str, dict[str, Any]], unit: dict[str, Any]
 def rebuild_state(events: list[dict[str, Any]], registry: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
     registry = registry or {}
     # Direct callers have the same per-event boundary as inbox/ledger readers.
-    for event in events:
-        validate_learning_event(event)
+    validate_event_sequence(events)
     # Stable sorting preserves append order for revisions at the same instant.
     ordered = sorted(events, key=lambda item: parse_datetime(item["timestamp"]))
     units: dict[str, dict[str, Any]] = {}
