@@ -1,79 +1,37 @@
 # v0.3.1 release review
 
-Status: release candidate, not published. A version in a branch is not a release.
+The maintainer authorized merge and deployment after the implementation review. Author validation and CI are not third-party approval. Publication is established by the actual GitHub tag/release and commit, not by this document or a version file.
 
-## Scope
+## Reviewed implementation
 
-PR #1 stages mobile operations, publishes receipts last, rolls back caught
-publication errors, preserves unresolved diagnoses, and orders equal-time
-revisions by ledger position. PR #2 adds independently verifiable commits for:
+- Receipt-last staged publication, caught-failure rollback, explicit same-ID/hash recovery and local cooperating-writer serialization.
+- Separate qualified independent, transfer, delayed and timed evidence; retain supported learning and failures. Overall can remain unknown.
+- Legal per-unit diagnosis revisions and closure against relevant actually tested targets; later recurrence remains visible.
+- Future review/confirmation gates and registered subject/prerequisite checks, without changing scores or weights.
+- A new-write source gate for ambiguous draft-check confirmations, preserving legacy 1.0 reads and all historical observations.
+- Byte-prefix-preserving appends, direct reducer identity/chain checks and integer/bool contract agreement.
 
-1. Positive evidence qualification and unknown overall evidence summaries.
-2. Qualified, unit-scoped diagnosis closure and immediate error checks.
-3. Explicit same-ID/hash failed-request recovery with prior failure provenance.
-4. Due-review, known-prerequisite and overlapping generic-check constraints.
-5. Cooperating inbox writer serialization, with Linux/Windows CI coverage.
-6. Release-candidate metadata and this review record.
+The final candidate has 118 fictional tests. Separate behavioral acceptance has no failing implemented assertions; missing additional subject contracts and longitudinal reporting remain explicitly unavailable. No real learning history is used in public fixtures.
 
-The follow-up offline candidate suite has 103 fictional tests, including 18
-normal-mobile-path regressions for target-aware closure, confirmation due
-times and known subject identity. The earlier 85-test tree remains the
-unmodified PR baseline until these patches are reviewed and adopted.
-The separate prior-audit
-acceptance harness has 20 requirements. Neither result measures learning gain.
-Scoring weights and the score formula are unchanged. No FSRS, BKT or FIRe is
-included. Events, requests and receipts retain schema 1.0.
+## Publication and Vault adoption
 
-## Required review and release gates
+The existing test workflow runs Linux and Windows jobs. Only a successful main-branch push with VERSION 0.3.1 may publish this one authorized tag/release, targeting that exact tested commit. Existing tags/releases are preserved; conflicting or non-final publication states fail visibly. No other version is automatically published. Only the publishing job has contents:write.
 
-- Review PR #1 at its exact head before merging it.
-- Retarget PR #2 to main after #1 is merged; review the final head and base.
-- Verify all Linux and Windows jobs, event/example validation and the public
-  boundary scan on that final tree. Do not count author testing as independent
-  review or infer approval from successful CI.
-- Verify `VERSION` and the engine version reported in new receipts/exports.
-- Publish the v0.3.1 release/tag for the reviewed exact commit. Update the
-  candidate status/date when publication is authorized; check release contents.
-- Each Vault separately reviews its cloud writer controls and a lock-only
-  upgrade to the published commit. No learning event or existing receipt is
-  migrated by the release. Rebuild only in isolated output during review.
+Official command/permission references:
 
-## Compatibility and rollback
+- https://cli.github.com/manual/gh_release_create
+- https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
 
-`heuristic-evidence-0.2` adds optional coverage/counts and can leave overall
-unknown despite observations. Consumers must distinguish null from zero.
-The repeated-evidence gate is conservative reporting, not validated mastery.
-`constrained-priority-0.2` identifies the executed eligibility rules; the old
-configuration label is retained in optional `config_model_version`. An old
-configuration is usable without changing its weights.
+After publication, independently resolve the tag to its actual commit before a separate Vault lock-only adoption. Retain the Vault's serialized main-only writer safeguards. Check a new no-op unit-registration receipt and refreshed export without creating fictional learning observations.
 
-Roll back a Vault by a reviewed lock-only PR to its prior exact release.
-Retain append-only events and original receipts, replay to isolated output,
-and inspect plans before refreshing production outputs. Never make a failed
-operation look successful by editing its receipt. Explicit recovery retains
-the old failed receipt and refuses changed identities/content.
+## Compatibility and recovery
+
+Events, requests and receipts stay at Schema 1.0. heuristic-evidence-0.2 and constrained-priority-0.2 remain interpretable heuristics, not probabilities. Preserve null overall as unknown. New admission rules are applied only to genuinely new events, not legacy reads or identical-event deduplication.
+
+Roll back a Vault only through an authorized lock-only PR, with isolated replay and receipt inspection. Keep events, the registry and historical receipts intact. Never relabel a subject, edit a failed receipt into success or manufacture evidence to make a rollback pass.
 
 ## Remaining limits
 
-The follow-up patches address three reproduced release-blocker groups; they
-do not establish release readiness. A separate fictional acceptance check
-still accepts a purported confirmed draft diagnosis based only on an
-ambiguous critical transcription and caller-declared verification. Resolve
-that source-admission gate with legacy-read compatibility and positive
-controls before declaring the full evidence audit complete. Do not try to
-infer truth by keyword matching in learner_verdict. A long-term research
-reporter and additional subject contracts are not implemented by these fixes.
+Writer locks are local and advisory; different checkouts and non-cooperating direct writers still require coordination. Multi-file publication is not a crash-safe transaction. Hard termination requires ledger/receipt inspection before recovery. The source gate checks declared provenance relationships, not whether a caller's free text is truthful or whether an inferred root cause is psychologically correct.
 
-The writer guard is advisory and local to one checkout. Cloud runners need a
-shared workflow concurrency group and a fresh default-branch checkout; direct
-or old-version writers must still be coordinated. Publishing several files is
-not a crash-safe database transaction. Hard termination during publication
-requires isolated evidence/receipt inspection before replay.
-
-Generic correction/diagnostic checks share one session slot per unit.
-Diagnosis-specific tasks remain distinct; their true overlap cannot be inferred
-from unit IDs alone. Unknown external units depend on caller qualification.
-Priority metrics, intervals, durations and prerequisite thresholds remain
-uncalibrated heuristics. Historical delayed-day claims lack verified exposure
-timelines, and missing study outcomes remain unestimable. Evaluate scheduling
-with subsequent independent attempts rather than internal score changes.
+Intervals, prerequisite thresholds and summary weights remain uncalibrated. delayed_days alone does not prove absence of intervening exposure. No new subject contract, longitudinal report generator, calibrated learning model or potential score is included.

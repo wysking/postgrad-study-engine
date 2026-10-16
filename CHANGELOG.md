@@ -1,10 +1,13 @@
 # Changelog
 
-## v0.3.1 - Release candidate (unreleased)
+## v0.3.1 - 2026-10-16
 
 - Require a qualified, actually tested target for diagnosis completion. Transfer-only and timed-only work cannot be closed by recall, and unmeasured timed work stays open without discarding genuine independent solving evidence.
 - Respect future due times for diagnostic, correction and targeted checks as well as reviews; keep explicitly labeled early practice separate from delayed confirmation.
 - Exclude scheduler candidates whose subject conflicts with a known unit before applying phase, activation and subject-time constraints.
+- Guard new draft-check confirmations when their only critical source is ambiguous; require clear related corroboration while keeping valid 1.0 history readable and unchanged.
+- Preserve the existing ledger byte prefix on append, validate duplicate identities and legal diagnosis chains for direct reducer calls, and reject boolean unit durations consistently with the Schema.
+- Publish this authorized version only after both operating-system CI jobs pass on the main-branch commit; never replace an existing tag or release.
 
 - Guard each inbox read/stage/publish cycle with a non-blocking operating-system lock; report contention without a sticky failed receipt and release ownership on process exit. Separate runner checkouts still require serialized workflows.
 - Enforce review due dates and registered prerequisites for external learning candidates; select at most one generic correction/diagnostic per unit per session without removing unresolved work or changing scoring weights.
