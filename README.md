@@ -7,6 +7,9 @@ Reusable Core for evidence-based study systems. The repository contains:
 - a structured `inbox/<request_id>.json` → `outbox/<request_id>.json` integration for a private Vault;
 - teaching and error-closure protocols, blank templates, fictional examples, tests, and CI.
 
+Version v0.4.0 adds [compact study records](docs/LIGHTWEIGHT_STUDY_RECORDS.md)
+that do not require a complete assessment or modify learning-state estimates.
+Release and Vault lock adoption remain separate reviewed steps.
 Version v0.3.1 provides the reliability changes described in
 [the release review](docs/RELEASE_REVIEW_0_3_1.md). The actual release/tag proves
 publication; each Vault's exact engine lock determines its adopted runtime.
@@ -28,7 +31,11 @@ From the Core checkout, process all JSON requests in a Vault inbox:
 python -m scripts.process_inbox --vault-root C:\path\to\private-vault
 ```
 
-Only a response with `status: "succeeded"` means the requested evidence was durably accepted. `pending` is used for project-change requests that still require review; `failed` means no durable archive claim may be made.
+Only a response with `status: "succeeded"` confirms the corresponding operation.
+For `save_study_record`, verify the expected record ID; this does not create an
+assessed learning event. For evidence operations, verify the expected event IDs.
+`pending` is used for project-change requests that still require review;
+`failed` means no durable archive claim may be made.
 
 ## Licensing
 

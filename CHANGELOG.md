@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.0 - 2026-10-19
+
+- Add `save_study_record`: a compact summary can be archived without assessment
+  fields, scheduler configuration, or a learning-state rebuild.
+- Keep immutable observations in `records/study_records.jsonl` with stable
+  request identity, original request hash, first receipt time and optional
+  observed date/time. Preserve existing ledger bytes when appending.
+- Publish an independent recent-record index and operation-specific receipt.
+  Only recognized derived-index errors degrade; storage and identity failures
+  do not become successful records.
+- Preserve event Schema 1.0, existing request behavior, scheduling and the
+  default full-inbox failure exit code. No automatic assessment or migration.
+- Publish this authorized version only after main-branch tests pass; verify
+  exact tag/release identity and preserve already published versions. Private
+  Vault adoption remains a separate reviewed lock-only upgrade.
+
 ## v0.3.1 - 2026-10-16
 
 - Require a qualified, actually tested target for diagnosis completion. Transfer-only and timed-only work cannot be closed by recall, and unmeasured timed work stays open without discarding genuine independent solving evidence.

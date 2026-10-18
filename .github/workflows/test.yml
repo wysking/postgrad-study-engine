@@ -62,3 +62,86 @@ jobs:
             exit 1
           fi
           gh release create v0.3.1 --target "$GITHUB_SHA" --title "v0.3.1" --notes-file docs/RELEASE_NOTES_0_3_1.md
+
+  publish-v0-4-0:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-v0.4.0
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Publish only the authorized v0.4.0 release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          release_version=$(tr -d '\r\n' < VERSION)
+          if [[ "$release_version" != "0.4.0" ]]; then
+            echo "This job publishes only v0.4.0; skipping."
+            exit 0
+          fi
+          if [[ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ]] || [[ "$(python -c 'from scripts.process_inbox import ENGINE_VERSION; print(ENGINE_VERSION)')" != "$release_version" ]]; then
+            echo "Release checkout or runtime version does not match the tested target."
+            exit 1
+          fi
+          tag="v$release_version"
+          release_json="$RUNNER_TEMP/release-$tag.json"
+          lookup_release() {
+            release_status=$(curl --silent --show-error --output "$release_json" --write-out '%{http_code}' \
+              --header "Authorization: Bearer $GH_TOKEN" --header "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GH_REPO/releases/tags/$tag")
+            if [[ "$release_status" != "200" && "$release_status" != "404" ]]; then
+              echo "Release lookup failed with HTTP $release_status; publication stopped."
+              exit 1
+            fi
+          }
+          verify_release() {
+            python - "$release_json" "$tag" "$tag_commit" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              release = json.load(handle)
+          expected = (sys.argv[2], sys.argv[3], False, False)
+          actual = (release.get("tag_name"), release.get("target_commitish"), release.get("draft"), release.get("prerelease"))
+          if actual != expected:
+              raise SystemExit("Release metadata does not match the exact final target.")
+          PY
+          }
+          git fetch --tags --no-recurse-submodules origin
+          lookup_release
+          if [[ "$release_status" == "200" ]]; then
+            tag_commit=$(git rev-parse --verify "$tag^{commit}")
+            verify_release
+            git merge-base --is-ancestor "$tag_commit" "$GITHUB_SHA"
+            if [[ "$(git show "$tag:VERSION" | tr -d '\r\n')" != "$release_version" ]]; then
+              echo "Existing release tag has a conflicting version."
+              exit 1
+            fi
+            echo "v0.4.0 is already published; preserving its exact tag and release."
+            exit 0
+          fi
+          if git show-ref --verify --quiet "refs/tags/$tag"; then
+            echo "An existing tag without a final release requires review; refusing to overwrite it."
+            exit 1
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file docs/RELEASE_NOTES_0_4_0.md
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          tag_commit=$(git rev-parse --verify "$tag^{commit}")
+          if [[ "$tag_commit" != "$GITHUB_SHA" ]]; then
+            echo "Published tag does not match the tested main commit."
+            exit 1
+          fi
+          lookup_release
+          [[ "$release_status" == "200" ]]
+          verify_release

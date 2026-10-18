@@ -7,7 +7,7 @@ import math
 import os
 import re
 import tempfile
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -30,6 +30,7 @@ REQUEST_OPERATIONS = {
     "update_source_reference",
     "record_contest_baseline",
     "project_change_request",
+    "save_study_record",
 }
 RESPONSE_STATUSES = {"succeeded", "failed", "pending"}
 ACTIVITIES = {"learn", "recall", "solve", "review", "timed_practice", "explain", "variant"}
@@ -273,6 +274,52 @@ def validate_mobile_request(request: Any) -> dict[str, Any]:
     if "client" in request and (not isinstance(request["client"], str) or not request["client"].strip()):
         raise ContractError("mobile_request.client must be a non-empty string")
     return request
+
+
+def validate_study_record_payload(payload: Any) -> dict[str, Any]:
+    """Validate compact observations without requiring an assessment."""
+    payload = _require_mapping(payload, "study_record.payload")
+    allowed = {"summary", "subject_label", "topic", "source_ref", "occurred_at", "occurred_on"}
+    _reject_extra(payload, allowed, "study_record.payload")
+    _require_keys(payload, ("summary",), "study_record.payload")
+    for key in ("summary", "subject_label", "topic", "source_ref"):
+        if key in payload:
+            value = payload[key]
+            if not isinstance(value, str) or not value.strip() or len(value) > 12000:
+                raise ContractError(f"study_record.{key} must be a non-empty string up to 12000 characters")
+    if "occurred_at" in payload and "occurred_on" in payload:
+        raise ContractError("study_record may specify occurred_at or occurred_on, not both")
+    if "occurred_at" in payload:
+        parse_datetime(payload["occurred_at"], "study_record.occurred_at")
+    if "occurred_on" in payload:
+        value = payload["occurred_on"]
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            raise ContractError("study_record.occurred_on must be YYYY-MM-DD")
+        try:
+            date.fromisoformat(value)
+        except ValueError as exc:
+            raise ContractError("study_record.occurred_on must be a valid date") from exc
+    return payload
+
+
+def validate_study_record(record: Any) -> dict[str, Any]:
+    record = _require_mapping(record, "study_record")
+    metadata = {"schema_version", "record_id", "request_hash", "request_created_at", "received_at", "client"}
+    fields = {"summary", "subject_label", "topic", "source_ref", "occurred_at", "occurred_on"}
+    _reject_extra(record, metadata | fields, "study_record")
+    _require_keys(record, ("schema_version", "record_id", "request_hash", "request_created_at", "received_at", "summary"), "study_record")
+    if record["schema_version"] != "1.0":
+        raise ContractError("study_record.schema_version must be '1.0'")
+    if not isinstance(record["record_id"], str) or not REQUEST_ID_RE.fullmatch(record["record_id"]):
+        raise ContractError("study_record.record_id must be a valid request ID")
+    if not isinstance(record["request_hash"], str) or not SHA256_RE.fullmatch(record["request_hash"]):
+        raise ContractError("study_record.request_hash must be a SHA-256 hex digest")
+    for key in ("request_created_at", "received_at"):
+        parse_datetime(record[key], f"study_record.{key}")
+    if "client" in record and (not isinstance(record["client"], str) or not record["client"].strip()):
+        raise ContractError("study_record.client must be a non-empty string")
+    validate_study_record_payload({key: value for key, value in record.items() if key in fields})
+    return record
 
 
 def validate_mobile_response(response: Any) -> dict[str, Any]:

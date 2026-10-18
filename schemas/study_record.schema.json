@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/study_record.schema.json",
+  "title": "Compact study record, separate from assessed learning events",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_id", "request_hash", "request_created_at", "received_at", "summary"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "record_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},
+    "request_hash": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+    "request_created_at": {"type": "string", "format": "date-time"},
+    "received_at": {"type": "string", "format": "date-time"},
+    "client": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "summary": {"$ref": "#/$defs/text"},
+    "subject_label": {"$ref": "#/$defs/text"},
+    "topic": {"$ref": "#/$defs/text"},
+    "source_ref": {"$ref": "#/$defs/text"},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "occurred_on": {"type": "string", "format": "date", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}
+  },
+  "not": {"required": ["occurred_at", "occurred_on"]},
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "maxLength": 12000, "pattern": "\\S"},
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary"],
+      "properties": {
+        "summary": {"$ref": "#/$defs/text"},
+        "subject_label": {"$ref": "#/$defs/text"},
+        "topic": {"$ref": "#/$defs/text"},
+        "source_ref": {"$ref": "#/$defs/text"},
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "occurred_on": {"type": "string", "format": "date", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}
+      },
+      "not": {"required": ["occurred_at", "occurred_on"]}
+    }
+  }
+}
