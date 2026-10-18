@@ -13,7 +13,7 @@
       "enum": [
         "record_attempt", "record_diagnosis", "register_unit", "save_session_result",
         "request_schedule", "update_source_reference", "record_contest_baseline",
-        "project_change_request"
+        "project_change_request", "save_study_record"
       ]
     },
     "payload": {"type": "object"},

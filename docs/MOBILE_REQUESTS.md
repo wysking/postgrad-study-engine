@@ -16,6 +16,14 @@ contain a transcript.
 | `update_source_reference` | `{ "reference": <source reference> }` | Append compact provenance metadata |
 | `record_contest_baseline` | `{ "event": <math_contest attempt> }` | Append only when Vault activation allows it |
 | `project_change_request` | title, description, acceptance criteria | Record a pending review request; never mutate code |
+| `save_study_record` | compact summary; optional subject label, topic, source and observed date/time | Save an observation without creating an assessed event |
+
+`save_study_record` is a v0.4.0 capability. A client must read its Vault's
+locked contract before using it; older runtimes do not support this operation.
+See [the compact record contract](LIGHTWEIGHT_STUDY_RECORDS.md). Its payload
+has a separate validator, `validate_study_record_payload`; envelope validation
+alone does not validate the summary. A succeeded record receipt confirms the
+record, while `evaluation_status: not_requested` means no assessment was queued.
 
 `record_contest_baseline` is a capability of the public Core. Its activation
 date is private Vault policy, so the same Core can be reused by different

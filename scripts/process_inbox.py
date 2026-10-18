@@ -34,9 +34,10 @@ from scripts.contracts import (
 )
 from scripts.reducer import build_context_capsule, load_units, rebuild_state
 from scripts.scheduler import build_schedule
+from scripts.study_records import INDEX_RELATIVE as RECORD_INDEX_RELATIVE, RECORDS_RELATIVE, save_record
 
 
-ENGINE_VERSION = "0.3.1"
+ENGINE_VERSION = "0.4.0"
 EVENTS_RELATIVE = Path("events") / "learning_events.jsonl"
 UNITS_RELATIVE = Path("state") / "knowledge_units.json"
 DERIVED_STATE_RELATIVE = Path("state") / "derived_state.json"
@@ -51,6 +52,8 @@ DURABLE_OUTPUTS = (
     EXPORTS_RELATIVE / "latest.md",
     SOURCES_RELATIVE,
     CHANGE_REQUESTS_RELATIVE,
+    RECORDS_RELATIVE,
+    RECORD_INDEX_RELATIVE,
 )
 
 
@@ -259,6 +262,9 @@ def process_request(vault_root: Path, request: dict[str, Any]) -> dict[str, Any]
     validate_mobile_request(request)
     _reject_transcript_fields(request["payload"])
     payload = request["payload"]
+    if request["operation"] == "save_study_record":
+        result = save_record(vault_root, request, _request_hash(request), _utc_now())
+        return _response(request, "succeeded", result=result)
     config = _load_config(vault_root)
     events_path = _vault_path(vault_root, EVENTS_RELATIVE)
 
