@@ -98,7 +98,9 @@ First review and publish a supporting Core, then review the Vault's lock and
 workflow persistence changes, then enable its phone template. The workflow
 must persist `records` as well as `outbox` and `exports`; the new directory
 may be absent before its first record. An unreleased branch is not deployment.
-The current release workflow does not automatically publish a new version.
+The version-specific v0.4.0 release job runs only after main-branch tests pass,
+verifies the exact tag and final release, and preserves published versions.
+It does not adopt the release in a private Vault or publish arbitrary versions.
 
 Disable the client entry point or pause new processing when rolling back.
 Keep a runtime that recognizes existing new-format requests and receipts;

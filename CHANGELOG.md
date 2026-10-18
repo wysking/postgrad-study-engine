@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4.0 - Unreleased
+## v0.4.0 - 2026-10-19
 
 - Add `save_study_record`: a compact summary can be archived without assessment
   fields, scheduler configuration, or a learning-state rebuild.
@@ -12,8 +12,9 @@
   do not become successful records.
 - Preserve event Schema 1.0, existing request behavior, scheduling and the
   default full-inbox failure exit code. No automatic assessment or migration.
-- Release publication and private Vault adoption require separate review. The
-  existing release job remains restricted to its previously authorized version.
+- Publish this authorized version only after main-branch tests pass; verify
+  exact tag/release identity and preserve already published versions. Private
+  Vault adoption remains a separate reviewed lock-only upgrade.
 
 ## v0.3.1 - 2026-10-16
 

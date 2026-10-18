@@ -7,7 +7,7 @@ Reusable Core for evidence-based study systems. The repository contains:
 - a structured `inbox/<request_id>.json` → `outbox/<request_id>.json` integration for a private Vault;
 - teaching and error-closure protocols, blank templates, fictional examples, tests, and CI.
 
-The v0.4.0 candidate adds [compact study records](docs/LIGHTWEIGHT_STUDY_RECORDS.md)
+Version v0.4.0 adds [compact study records](docs/LIGHTWEIGHT_STUDY_RECORDS.md)
 that do not require a complete assessment or modify learning-state estimates.
 Release and Vault lock adoption remain separate reviewed steps.
 Version v0.3.1 provides the reliability changes described in
