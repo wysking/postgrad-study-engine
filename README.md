@@ -1,5 +1,7 @@
 # Postgrad Study Engine
 
+[简体中文](README.md) · [English](README.en.md)
+
 **An Open, Evidence-Based Learning Engine**
 
 让 AI 从回答问题，走向支持长期、可验证的学习。
@@ -109,6 +111,8 @@ python -m scripts.schedule_global --state state/local/readme-demo/derived_state.
 
 ### 3. 接入自己的私人 Vault
 
+首次接入请从[分步指南（中英双语）](docs/GETTING_STARTED.md)开始：准备空白 Vault、锁定运行提交、检查配置，再用不新增学习事件的计划请求验证请求与回执闭环。
+
 开发者先阅读 [跨端工作流](docs/MOBILE_DESKTOP_WORKFLOW.md)、[请求契约](docs/MOBILE_REQUESTS.md) 和 [迁移说明](migrations/README.md)，准备自己的私有配置、数据与精确引擎锁。以下命令中的相邻路径需替换为已配置的 Vault：
 
 ```sh
@@ -152,6 +156,7 @@ python -m scripts.process_inbox --vault-root ../private-vault
 
 | 主题 | 入口 |
 | --- | --- |
+| 首次接入 | [分步指南（中英双语）](docs/GETTING_STARTED.md) |
 | 数据与运行工具 | [数据契约](docs/DATA_CONTRACTS.md)、[Schema](schemas/README.md)、[脚本](scripts/README.md) |
 | 教学与错误处理 | [学习会话协议](docs/STUDY_SESSION_PROTOCOL.md)、[错误闭环](docs/ERROR_CLOSURE_PROTOCOL.md) |
 | 移动集成与记录 | [跨端工作流](docs/MOBILE_DESKTOP_WORKFLOW.md)、[请求与回执](docs/MOBILE_REQUESTS.md)、[轻量记录](docs/LIGHTWEIGHT_STUDY_RECORDS.md) |
