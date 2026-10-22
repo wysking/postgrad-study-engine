@@ -1,5 +1,23 @@
 # Schema migrations
 
+## v0.5.0 learning-loop adoption
+
+Existing 1.0 events, receipts, reducer and scheduler need no migration. New
+learner identity, course packages and model/rating reports use independent
+contracts; they do not add fields to historical learning events. Existing
+Vaults need a reviewed identity/configuration adoption and an independent lock
+upgrade after a release. The initializer only accepts a new directory. No
+remote workflow persistence or production adoption is performed automatically.
+Removing the new modules/reports preserves old evidence readability.
+
+Derived recall reports are `learning-models-0.2`; regenerate them rather than
+copying estimates from the development 0.1 model. Probe identifiers are now
+namespaced as `<course_id>:<probe_id>`. Stored compact records must match their
+original requests when checked by the new CLI. Do not rewrite historical receipts
+to make missing or conflicting stored data appear verified. Rebuild in an
+isolated workspace, compare outputs, then review an exact-lock upgrade; rollback
+restores the prior lock and preserves evidence, with generated reports disposable.
+
 Historical learning events are immutable. When a contract must break:
 
 1. add a new schema version and a documented migration;
@@ -11,7 +29,7 @@ Historical learning events are immutable. When a contract must break:
 Never rewrite production history in place and never let a failed migration
 replace the current Vault state.
 
-## Unreleased receipt and review fixes
+## v0.5.0 receipt and review fixes
 
 Event schema 1.0 remains readable without rewriting the ledger. Rebuilt queues
 include hypothesized/unresolved diagnoses, and diagnosis-specific task IDs use
@@ -23,7 +41,7 @@ termination and multiple writers still require explicit operational controls.
 Publish a reviewed Core release first, then propose a separate lock-only Vault
 upgrade. Existing receipts retain their original version and status.
 
-## Unreleased evidence qualification
+## v0.5.0 evidence qualification
 
 heuristic-evidence-0.2 keeps event schema 1.0 and adds optional unit-level
 positive-evidence counts and coverage in rebuilt state. Overall summaries may
@@ -34,7 +52,7 @@ The two-success gate is a conservative reporting rule, not a calibrated mastery
 criterion. Changed evidence summaries can change derived candidate values;
 the separate eligibility change below leaves scoring weights unchanged.
 
-## Unreleased scheduling eligibility
+## v0.5.0 scheduling eligibility
 
 Review tasks with future due dates are excluded with `review_not_due`. Known
 unit prerequisites apply equally to external learning/practice candidates;

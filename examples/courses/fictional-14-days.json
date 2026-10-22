@@ -1,0 +1,322 @@
+{
+  "fictional": true,
+  "events": [
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-1",
+      "timestamp": "2026-08-01T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.equivalence_solve"
+      ],
+      "activity": "solve",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.equivalence_solve",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation."
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-2",
+      "timestamp": "2026-08-04T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.equivalence_solve"
+      ],
+      "activity": "solve",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-subtraction-boundary",
+        "result": "incorrect",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional learner replaced sin(x)-x by zero using first-order equivalence and concluded a zero limit."
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-diagnosis-1",
+      "timestamp": "2026-08-04T09:01:00Z",
+      "event_type": "diagnosis",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.equivalence_solve"
+      ],
+      "source_ref": "fictional-demo:authored-fixture",
+      "diagnosis": {
+        "diagnosis_id": "fictional-equivalence-diagnosis",
+        "question_id": "fictional-subtraction-boundary",
+        "status": "confirmed",
+        "generated_by": "joint",
+        "first_divergence": "Fictional learner used first-order equivalence after leading terms cancel.",
+        "root_cause": "Fictional local cancellation error; not a durable learner trait.",
+        "error_tags": [
+          "equivalence_cancellation"
+        ],
+        "evidence_refs": [
+          "fictional-day-2"
+        ],
+        "learner_verdict": "Fictional learner independently recalled the cancellation mistake.",
+        "confirmation_method": "learner_recall",
+        "next_action": "Use one independent boundary probe and later delayed confirmation."
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-3",
+      "timestamp": "2026-08-05T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.equivalence_solve"
+      ],
+      "activity": "solve",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.equivalence_solve",
+        "result": "correct",
+        "answer_mode": "assisted",
+        "process_check": "clean",
+        "assistance_level": 1,
+        "evidence": "Fictional scripted response, never a real learner observation."
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-4",
+      "timestamp": "2026-08-06T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.equivalence_solve"
+      ],
+      "activity": "variant",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.equivalence_solve-variant-4",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "variant_level": "near_transfer",
+        "parent_diagnosis_id": "fictional-equivalence-diagnosis"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-5",
+      "timestamp": "2026-08-15T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.equivalence_solve"
+      ],
+      "activity": "solve",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.equivalence_solve",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "delayed_days": 9
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-6",
+      "timestamp": "2026-08-01T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.standard_recall"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.standard_recall",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation."
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-7",
+      "timestamp": "2026-08-04T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.standard_recall"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.standard_recall",
+        "result": "incorrect",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "delayed_days": 3
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-8",
+      "timestamp": "2026-08-05T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.standard_recall"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.standard_recall",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation."
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-9",
+      "timestamp": "2026-08-08T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.standard_recall"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.standard_recall",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "delayed_days": 3
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-10",
+      "timestamp": "2026-08-15T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "math",
+      "unit_ids": [
+        "math.limit.standard_recall"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-math.limit.standard_recall",
+        "result": "incorrect",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "delayed_days": 7
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-11",
+      "timestamp": "2026-08-01T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "english",
+      "unit_ids": [
+        "english.vocab.ephemeral"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-english.vocab.ephemeral",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation."
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-12",
+      "timestamp": "2026-08-04T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "english",
+      "unit_ids": [
+        "english.vocab.ephemeral"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-english.vocab.ephemeral",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "delayed_days": 3
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-13",
+      "timestamp": "2026-08-11T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "english",
+      "unit_ids": [
+        "english.vocab.ephemeral"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-english.vocab.ephemeral",
+        "result": "correct",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "delayed_days": 7
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": "fictional-day-14",
+      "timestamp": "2026-08-15T09:00:00Z",
+      "event_type": "attempt",
+      "subject": "english",
+      "unit_ids": [
+        "english.vocab.ephemeral"
+      ],
+      "activity": "recall",
+      "source_ref": "fictional-demo:authored-fixture",
+      "attempt": {
+        "question_id": "fictional-item-english.vocab.ephemeral",
+        "result": "incorrect",
+        "answer_mode": "independent",
+        "process_check": "clean",
+        "assistance_level": 0,
+        "evidence": "Fictional scripted response, never a real learner observation.",
+        "delayed_days": 4
+      }
+    }
+  ]
+}

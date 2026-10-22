@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "$id": "https://postgrad-study-engine.local/schemas/fsrs_ratings.schema.json",
+  "required": [
+    "schema_version",
+    "learner_id",
+    "ratings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "learner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ratings": {
+      "type": "array",
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "event_id",
+          "rating",
+          "source"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "source": {
+            "const": "observed"
+          }
+        }
+      }
+    }
+  }
+}

@@ -12,6 +12,21 @@
 [![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
 
+**v0.5.0：从空白档案到教学与预测。** 新增统一学习入口、
+九单元虚构课程、14 天重放、可拟合记忆基线、可选 FSRS、先修探针和本地仪表盘。
+每位学习者独立保存档案和模型；预测明确区分先验、未校准拟合与实际证据。
+已提供可复现的[合成校准检查](docs/CALIBRATION_REPORT_0_5_0.md)；真实人群校准尚未验证。
+
+```sh
+python -m scripts.study demo --vault ../fictional-study-demo
+python -m scripts.study today --vault ../fictional-study-demo --as-of 2026-08-15T09:00:00Z
+```
+
+在干净的 v0.5.0 检出中运行，打开演示目录的 `reports/demo.html`，即可查看
+“独立正确仍缺证据 → 第三天失败 → 辅助与独立表现分开 → 后续复测”的虚构过程。
+演示会拒绝已有目录，不写入真实档案。[运行与模型说明](docs/LEARNING_MODELS.md)
+· [教学 Skill](skills/study-tutor/SKILL.md)。拟合及软件测试不等于已经证明学习效果。
+
 ChatGPT 可以解释一道题，但看懂解释、提示后完成和独立求解，代表不同的学习证据。一次正确也不足以证明长期保持。学习者需要一个能保留真实学习经历、追踪错误与复习依据，并在证据不足时明确保留未知的系统。
 
 Postgrad Study Engine 为此提供开放、可复核、可复用的基础设施：交互层负责教学，Core 负责验证与确定性处理，私人 Vault 保存学习证据和配置。考研是起点；长期目标是让经过验证的学习证据在模型、设备和交互工具变化后，仍尽可能可理解、可迁移、可审查。
@@ -48,15 +63,16 @@ Postgrad Study Engine 为此提供开放、可复核、可复用的基础设施�
 
 ## Development Status · 版本与进度
 
-**当前公开版本：[v0.4.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.4.0)。** 核心基础设施已建立，可靠性与使用体验仍在持续完善；当前主要提供契约、Python 工具、协议和集成工作流。
+**当前公开版本：[v0.5.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0)。** 核心基础设施已建立，可靠性与使用体验仍在持续完善；当前主要提供契约、Python 工具、协议和集成工作流。
 
 | 公开版本 | 阶段成果 | 发布依据 |
 | --- | --- | --- |
 | v0.3.0 | 建立公共 Core、数据契约、移动请求处理、状态重建与学习调度 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.3.0) |
 | v0.3.1 | 加强独立证据资格、诊断闭环、调度门槛、一致性与失败恢复 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.3.1)、[复核记录](docs/RELEASE_REVIEW_0_3_1.md) |
 | v0.4.0 | 增加独立存储的轻量观察记录，同时保持原有正式事件契约 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.4.0)、[发布说明](docs/RELEASE_NOTES_0_4_0.md) |
+| v0.5.0 | 统一学习入口、个体记忆拟合、可选 FSRS、先修探针、教学适配与合成校准检查 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0)、[发布与复核](docs/RELEASE_NOTES_0_5_0.md) |
 
-v0.4.0 发布验证记录包含 **136 项使用虚构数据的单元与集成测试**，其中包括 18 项轻量记录边界与恢复检查，并在 Linux、Windows CI 上验证。这是该版本的发布记录；当前运行结果请查看上方 CI。测试验证软件行为，不证明长期学习效果。
+v0.4.0 发布验证记录包含 **136 项使用虚构数据的单元与集成测试**，其中包括 18 项轻量记录边界与恢复检查，并在 Linux、Windows CI 上验证。这是该版本的发布记录；v0.5.0 的复核与边界见[发布记录](docs/RELEASE_REVIEW_0_5_0.md)，当前运行结果请查看上方 CI。测试验证软件行为，不证明长期学习效果。
 
 公共版本发布与私人 Vault 采用是两件事。每个 Vault 以自己的 `engine.lock.json` 锁定精确提交；升级需要独立审核，发布新版不会自动改变使用者的运行版本。完整变化见 [CHANGELOG](CHANGELOG.md)。
 
@@ -86,7 +102,7 @@ ChatGPT 等交互工具负责讲解、提问、观察作答和提出候选错因
 ### 1. 获取已发布版本并验证
 
 ```sh
-git clone --branch v0.4.0 https://github.com/wysking/postgrad-study-engine.git
+git clone --branch v0.5.0 https://github.com/wysking/postgrad-study-engine.git
 cd postgrad-study-engine
 python -m unittest discover -s tests -v
 python -m scripts.validate_events
@@ -128,12 +144,12 @@ python -m scripts.process_inbox --vault-root ../private-vault
 | 阶段 | 状态 | 方向与验收依据 |
 | --- | --- | --- |
 | 1. 可信学习记录基础 | 核心能力已实现，持续完善 | 保留真实证据、独立表现、诊断与复习依据；以 v0.3.x–v0.4.0 的契约、重放与边界测试验证行为 |
-| 2. 更科学的学习安排 | 研究方向，尚未实现模型升级 | 积累延迟回忆结果，研究保持率校准；数据充分时评估 FSRS 等模型，并研究不确定时间与疲劳下的安排 |
-| 3. 可复用的 AI 学习基础设施 | 长期探索，范围待确认 | 探索更便利的 ChatGPT / OpenAI API 接入、不同用户独立部署、学科适配，以及长期学习效果验证 |
+| 2. 个体模型与学习安排 | v0.5.0 已实现实验模型，真实校准待验证 | 个体半衰期拟合、时序评估、可选 FSRS 与先修探针；下一步验证人群迁移、动态保持率和实际调度效果 |
+| 3. 可复用的 AI 学习基础设施 | 已有 CLI、教学 Skill 与 OpenAI 适配，持续建设 | 扩展真实课程、便利部署与接入体验；多用户托管及长期学习效果仍需独立建设和验证 |
 
 阶段 2 的详细方向与升级门槛见 [记忆与调度模型路线图](docs/MEMORY_AND_SCHEDULING_MODEL_ROADMAP.md)：保留历史事件，对比当前确定性基线，提供重放测试、可复现输出和回滚路径。未经校准的分数不能称作掌握概率或保证提分。
 
-阶段 3 是探索方向，尚未承诺实现，不改变当前 Core 的范围。新增服务、接口或模型需要单独提案与评审。[真实思维证据设计 PR #3](https://github.com/wysking/postgrad-study-engine/pull/3) 也是独立草案，不是当前生效契约或已上线的能力。
+阶段 3 已有本地入口，托管应用与自动远端部署仍属后续范围。新增服务、接口或模型需要单独提案与评审。[真实思维证据设计 PR #3](https://github.com/wysking/postgrad-study-engine/pull/3) 也是独立草案，不是当前生效契约或已上线的能力。
 
 ## Principles & Limitations · 原则与边界
 

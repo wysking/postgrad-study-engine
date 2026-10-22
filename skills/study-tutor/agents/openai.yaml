@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evidence-based Study Tutor"
+  short_description: "Teach from evidence and verify durable study receipts"
+  default_prompt: "Use $study-tutor to continue from my private study Vault."

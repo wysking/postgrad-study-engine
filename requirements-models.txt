@@ -1,0 +1,2 @@
+# Optional; the default CLI and half-life model use only the standard library.
+fsrs==6.3.2

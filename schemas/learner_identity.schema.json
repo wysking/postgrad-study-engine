@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "$id": "https://postgrad-study-engine.local/schemas/learner_identity.schema.json",
+  "required": [
+    "schema_version",
+    "learner_id",
+    "mode"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "learner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": [
+        "personal",
+        "demo"
+      ]
+    }
+  }
+}
