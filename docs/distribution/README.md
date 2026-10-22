@@ -21,9 +21,9 @@ plugin. `knowledge-tracing` denotes learning-state tracking, not an implemented
 BKT/DKT model or validated cognitive diagnosis. No unrelated agent/RAG/MCP
 capability is claimed.
 
-Set Social preview to [the prepared public PNG](../assets/social-preview.png).
-The image is 1774 × 887, 885,108 bytes, with visible experimental-status and
-illustrative-curve labels. Uploading it in repository Settings is a separate
+Set Social preview to [the selected public JPEG](../assets/social-preview.jpg).
+The image is 1774 × 887, 245,482 bytes, with a dark background, paper archives
+and the title “考研 AI 私教”. Uploading it in repository Settings is a separate
 step from committing the file. Recheck the resulting preview before reporting
 it configured.
 

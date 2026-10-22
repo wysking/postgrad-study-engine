@@ -14,7 +14,7 @@
 [![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
 
-![考研 AI 私教学习引擎：长期档案、错因追踪与遗忘曲线示意；实验模型，真实人群校准尚未验证](docs/assets/social-preview.png)
+![考研 AI 私教：学习档案、记忆拟合、错因诊断；黑白纸页档案与朱红标签封面](docs/assets/social-preview.jpg)
 
 **v0.5.0：从空白档案到教学与预测。** 新增统一学习入口、
 九单元虚构课程、14 天重放、可拟合记忆基线、可选 FSRS、先修探针和本地仪表盘。

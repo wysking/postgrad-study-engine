@@ -16,7 +16,7 @@ with replaceable course packages and teaching interfaces.
 [![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
 
-![Kaoyan AI study engine: private learning archives, error tracking and an illustrative forgetting curve; experimental model, human calibration unverified](docs/assets/social-preview.png)
+![Kaoyan AI tutor: learning records, memory fitting and error diagnosis; paper archives with a vermilion tab on a dark background](docs/assets/social-preview.jpg)
 
 **v0.5.0 experimental learning loop:** initialize a blank private Vault, run a
 nine-unit / 14-day fictional replay, fit a recall model, evaluate chronological
