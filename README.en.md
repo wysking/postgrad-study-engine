@@ -147,8 +147,8 @@ The following separates current capabilities, research directions, and long-term
 | Stage | Status | Direction and verification |
 | --- | --- | --- |
 | 1. Trustworthy learning records | Core capabilities implemented; ongoing improvements | Preserve real evidence, independent performance, diagnoses, and review grounds; verify behavior through v0.3.x–v0.4.0 contracts, replay, and boundary tests |
-| 2. More scientifically grounded study planning | Research direction; model upgrade not implemented | Collect delayed recall outcomes, study retention calibration, evaluate models such as FSRS when data supports it, and investigate uncertain time budgets and fatigue |
-| 3. Reusable AI learning infrastructure | Long-term exploration; scope to be defined | Explore easier ChatGPT / OpenAI API integration, separate deployments for different users, subject adaptation, and long-term learning-effect evaluation |
+| 2. Individual modeling and study planning | Experimental models implemented in v0.5.0; human calibration pending | Per-learner half-life fitting, temporal evaluation, optional FSRS and prerequisite probes; validate transfer, changing retention and real scheduling effects next |
+| 3. Reusable AI learning infrastructure | CLI, teaching Skill and OpenAI adapter implemented; ongoing development | Expand authored real courses and deployment/access; hosted multi-user operation and long-term effects need separate implementation and validation |
 
 The [memory and scheduling roadmap](docs/MEMORY_AND_SCHEDULING_MODEL_ROADMAP.md) describes stage 2 directions and adoption gates: preserve historical events, compare against the deterministic baseline, and provide replay tests, reproducible outputs, and rollback. Uncalibrated scores must not be presented as mastery probabilities or guaranteed score improvements.
 
