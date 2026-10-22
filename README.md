@@ -2,15 +2,19 @@
 
 [简体中文](README.md) · [English](README.en.md)
 
-**An Open, Evidence-Based Learning Engine**
+**考研 AI 私教学习引擎 · An Open, Evidence-Based Learning Engine**
 
-让 AI 从回答问题，走向支持长期、可验证的学习。
+面向考研（研究生入学考试，Kaoyan / National Postgraduate Entrance Examination）与长期自学：
+保存真实学习档案，逐人拟合遗忘曲线，追踪错因，用少量先修探针核查薄弱点。
+同一套开源 Core 支持各自独立的私人档案，课程与交互工具可以更换。
 
 [![Release](https://img.shields.io/github/v/release/wysking/postgrad-study-engine)](https://github.com/wysking/postgrad-study-engine/releases)
 [![Core tests](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/Python-3.12-blue)](.github/workflows/test.yml)
 [![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
+
+![考研 AI 私教学习引擎：长期档案、错因追踪与遗忘曲线示意；实验模型，真实人群校准尚未验证](docs/assets/social-preview.png)
 
 **v0.5.0：从空白档案到教学与预测。** 新增统一学习入口、
 九单元虚构课程、14 天重放、可拟合记忆基线、可选 FSRS、先修探针和本地仪表盘。
@@ -136,6 +140,53 @@ python -m scripts.process_inbox --vault-root ../private-vault
 ```
 
 这是面向集成者的入口，尚无一键创建并托管个人学习系统的安装器。启用轻量记录还需要该 Vault 支持记录持久化并采用兼容的锁定版本，见 [采用与回退要求](docs/LIGHTWEIGHT_STUDY_RECORDS.md#adoption-rollback-and-later-assessment)。
+
+## 常见问题 · FAQ
+
+### ChatGPT 为什么记不住我的学习进度？
+
+ChatGPT 可以通过产品记忆和历史对话提供个性化帮助，具体取决于设置与可用功能；
+“记得聊过什么”与“能逐条核对学习证据”承担不同任务。本引擎把真实作答、提示条件、
+诊断修订与延迟检查保存在你自己的 Vault，接续时读取状态并核对归档回执。
+缺少的事实仍是未知，不靠模型补写。参见 [OpenAI 记忆说明](https://help.openai.com/en/articles/8590148-memory-in-chatgpt)。
+
+### 不用刷完题库，AI 怎么找我的薄弱点？
+
+它根据课程先修关系、已观察到的失败和证据缺口提出**待验证假设**，再建议一至两道
+能区分候选原因的探针题。只有你实际作答后，才能据此更新证据。当前选题使用透明启发式；
+它只覆盖已配置的知识关系与探针，不保证发现所有未做题的错误，也不替代迁移与整卷检查。
+
+### 复习计划怎么按遗忘曲线排？
+
+对合格的原子回忆证据，`fit` 拟合有先验约束的半衰期模型；可选 FSRS 适配要求真实观察到的
+难易评分。数学综合求解不会被当作单张记忆卡。**v0.5.0 的模型输出用于教学参考，正式排程
+仍由原规则和真实时间预算决定**；模型建议日期不会自动接管全科调度。
+[模型假设与运行方法](docs/LEARNING_MODELS.md)说明了样本资格、时间评估及回退方式。
+
+### 和普通 ChatGPT、Anki、刷题 App 有什么区别？
+
+下面比较工作用途，不是学习效果排名；题库产品的能力各异。
+
+| 工具 | 适合承担的工作 | 与本引擎的关系 |
+| --- | --- | --- |
+| 普通 ChatGPT / 学习交互 | 讲解、追问、分级提示；产品记忆可辅助个性化 | 可作为教学前台，结合本引擎的结构化证据与回执；对话印象不直接变成掌握结论 |
+| Anki | 卡片检索练习与间隔复习，可选用 FSRS | 适合卡片学习；本引擎额外组织独立/辅助/迁移证据、错因修订与跨单元探针，不提供 Anki 牌组界面 |
+| 以题库为主的刷题 App | 题目覆盖、分类练习或整卷训练，功能因产品而异 | 可以供给实际练习来源；本引擎没有完整题库，也不把少做题等同于已覆盖所有内容 |
+| Postgrad Study Engine | 私人学习档案、可重放状态、个体模型与诊断参考 | 面向可复用部署；预测未校准，当前不提供托管账号系统或提分保证 |
+
+Anki 的 FSRS 用法以其[官方手册](https://docs.ankiweb.net/deck-options.html#fsrs)为准；
+本项目没有完成与上述产品的学习效果对照试验。
+
+### 能和 Obsidian 一起用吗？需要安装 App 吗？
+
+Vault 使用普通 Markdown / JSON 文件，可以用 Obsidian 等笔记工具查看 Markdown 内容。
+当前没有专用 Obsidian 插件、自动同步或双向写回；不要直接编辑账本和回执。
+v0.5.0 提供 Python CLI、教学 Skill 和本地 HTML 仪表盘，入门见[首次接入](docs/GETTING_STARTED.md)。
+
+### 已经证明能提分或节省多少刷题时间了吗？
+
+尚未证明。测试和虚构演示验证软件行为；[合成校准检查](docs/CALIBRATION_REPORT_0_5_0.md)
+也不等于真实人群校准。效果需要后续真实、合规且前瞻设计的评估。
 
 ## Roadmap · 发展路线
 

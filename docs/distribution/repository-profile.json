@@ -1,0 +1,26 @@
+{
+  "repository": "wysking/postgrad-study-engine",
+  "purpose": "desired_public_metadata_not_auto_applied",
+  "description": "考研 AI 私教学习引擎：长期学习档案、个人遗忘曲线拟合（半衰期 / 可选 FSRS）、错因诊断与先修探针 | Evidence-based AI study engine for Kaoyan (China's postgraduate entrance exam) — learner profile, fitted forgetting curve, error diagnosis, works with ChatGPT / OpenAI / Codex",
+  "topics": [
+    "kaoyan",
+    "postgraduate-entrance-exam",
+    "ai-tutor",
+    "adaptive-learning",
+    "learning-science",
+    "spaced-repetition",
+    "fsrs",
+    "forgetting-curve",
+    "knowledge-tracing",
+    "exam-prep",
+    "study-tools",
+    "learner-analytics",
+    "chatgpt",
+    "openai",
+    "education",
+    "python",
+    "obsidian",
+    "chinese"
+  ],
+  "homepage": "https://github.com/wysking/postgrad-study-engine/blob/main/docs/GETTING_STARTED.md"
+}

@@ -1,12 +1,27 @@
 # Postgrad Study Engine
 
-**v0.5.0 experimental learning loop:** initialize a blank private Vault, run an
-authored nine-unit / 14-day fictional learning loop, fit a recall model, evaluate
-chronological predictions, inspect prerequisite probes and open a local HTML
-report. Optional FSRS and an explicit OpenAI teaching adapter are included;
-each learner's evidence and parameters remain separate. The reproducible
-[synthetic sanity report](docs/CALIBRATION_REPORT_0_5_0.md) does not establish
-human calibration.
+[简体中文](README.md) · [English](README.en.md)
+
+**An Open, Evidence-Based Learning Engine for Kaoyan**
+
+An AI study engine for Kaoyan — China's National Postgraduate Entrance Examination
+(考研 / 研究生入学考试) — and long-term independent learning. Keep a private learning
+archive, fit learner-specific forgetting curves and investigate possible weak
+points with small diagnostic probes. The reusable Core serves separate learners
+with replaceable course packages and teaching interfaces.
+
+[![Release](https://img.shields.io/github/v/release/wysking/postgrad-study-engine)](https://github.com/wysking/postgrad-study-engine/releases)
+[![Core tests](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml)
+[![Python](https://img.shields.io/badge/Python-3.12-blue)](.github/workflows/test.yml)
+[![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
+[![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
+
+![Kaoyan AI study engine: private learning archives, error tracking and an illustrative forgetting curve; experimental model, human calibration unverified](docs/assets/social-preview.png)
+
+**v0.5.0 experimental learning loop:** initialize a blank private Vault, run a
+nine-unit / 14-day fictional replay, fit a recall model, evaluate chronological
+predictions and open a local HTML report. Optional FSRS and an explicit OpenAI
+teaching adapter are included. Each learner's evidence and parameters stay separate.
 
 ```sh
 python -m scripts.study demo --vault ../fictional-study-demo
@@ -14,21 +29,10 @@ python -m scripts.study today --vault ../fictional-study-demo --as-of 2026-08-15
 ```
 
 Run from the clean v0.5.0 checkout and open the demo's `reports/demo.html`.
-See [the learning-loop guide](docs/LEARNING_MODELS.md) and the repository-maintained
-[teaching Skill](skills/study-tutor/SKILL.md). Model fitting and passing software
-tests do not establish calibrated predictions or improved learning outcomes.
-
-[简体中文](README.md) · [English](README.en.md)
-
-**An Open, Evidence-Based Learning Engine**
-
-Help AI move from answering questions to supporting long-term, verifiable learning.
-
-[![Release](https://img.shields.io/github/v/release/wysking/postgrad-study-engine)](https://github.com/wysking/postgrad-study-engine/releases)
-[![Core tests](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml)
-[![Python](https://img.shields.io/badge/Python-3.12-blue)](.github/workflows/test.yml)
-[![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
-[![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
+See [the learning-loop guide](docs/LEARNING_MODELS.md) and repository
+[teaching Skill](skills/study-tutor/SKILL.md). The
+[synthetic sanity report](docs/CALIBRATION_REPORT_0_5_0.md) does not establish
+human calibration, improved retention or exam gains.
 
 ChatGPT can explain a problem, but understanding an explanation, succeeding with hints, and solving independently provide different kinds of evidence. One correct answer does not establish long-term retention. Learners need a system that preserves what actually happened, tracks errors and the reasons for review, and leaves unsupported conclusions unknown.
 
@@ -140,6 +144,65 @@ python -m scripts.process_inbox --vault-root ../private-vault
 
 This is an integrator entry point. There is no one-click installer that creates and hosts a personal learning system. Compact records also require compatible Vault persistence and a supporting locked runtime; see [adoption and rollback](docs/LIGHTWEIGHT_STUDY_RECORDS.md#adoption-rollback-and-later-assessment).
 
+## Frequently Asked Questions
+
+### Why does ChatGPT lose track of my learning progress?
+
+ChatGPT can personalize responses using product memory and chat history when
+available and enabled. A remembered conversation and an auditable learning
+record serve different purposes. This engine stores actual attempts, assistance,
+diagnosis revisions and delayed checks in your private Vault, then reconstructs
+state and verifies archival receipts. Missing observations remain unknown.
+See [OpenAI's memory documentation](https://help.openai.com/en/articles/8590148-memory-in-chatgpt).
+
+### How can AI find weak points without completing an entire question bank?
+
+Configured prerequisites, observed failures and evidence gaps support
+**hypotheses to check**. The engine suggests one or two authored probes that
+can distinguish candidate causes. Only an actual response supplies new evidence.
+Ranking is currently heuristic, coverage depends on the installed course, and
+this does not guarantee discovery of every unseen error or replace transfer and
+whole-paper checks.
+
+### How does review planning use a forgetting curve or FSRS?
+
+`fit` estimates a regularized half-life for qualified atomic recall observations.
+The optional FSRS adapter needs observed ease ratings. Broad mathematical
+problem solving is not relabeled as a flashcard. **In v0.5.0 model outputs are
+teaching references; the original rules and actual time budget still determine
+the formal schedule.** Model due-date suggestions do not automatically control
+cross-subject planning. See [assumptions and usage](docs/LEARNING_MODELS.md).
+
+### How does this compare with ChatGPT, Anki and question-bank apps?
+
+This compares roles, not learning outcomes. Question-bank products vary.
+
+| Tool | Useful role | Relationship to this engine |
+| --- | --- | --- |
+| ChatGPT / conversational teaching | Explanations, follow-up questions and graded hints; optional product memory | Can be the teaching interface, backed by this engine's structured evidence and matching receipts |
+| Anki | Retrieval practice and spaced review, including optional FSRS | Suits card-based study; this engine also organizes independent/assisted/transfer evidence, diagnosis revisions and prerequisite probes, without an Anki deck interface |
+| Question-bank apps | Coverage, classified exercises or whole-paper practice, depending on the product | Can supply practice material; this engine has no complete question bank and does not infer full coverage from fewer attempts |
+| Postgrad Study Engine | Private archives, replayable state, learner-specific models and diagnostic references | Reusable local deployment; predictions remain uncalibrated, without hosted accounts or demonstrated exam gains |
+
+Consult the [Anki manual](https://docs.ankiweb.net/deck-options.html#fsrs) for its
+FSRS behavior. No comparative learning-effect trial against these tools has
+been completed by this project.
+
+### Does it work with Obsidian? Is a separate app required?
+
+Vaults use ordinary Markdown / JSON files. Obsidian or another Markdown viewer
+can display the notes. There is no dedicated Obsidian plugin, automatic sync or
+bidirectional writeback; do not directly edit evidence ledgers or receipts.
+v0.5.0 supplies a Python CLI, teaching Skill and local HTML dashboard.
+Start with [first-time setup](docs/GETTING_STARTED.md).
+
+### Are improved scores or time savings already demonstrated?
+
+No. Software tests and fictional fixtures demonstrate implementation behavior.
+The [synthetic calibration check](docs/CALIBRATION_REPORT_0_5_0.md) is not human
+validation. Learning effects require appropriate real-world, prospectively
+designed evaluation.
+
 ## Roadmap
 
 The following separates current capabilities, research directions, and long-term product ideas. It promises neither delivery dates nor learning outcomes.
@@ -152,7 +215,7 @@ The following separates current capabilities, research directions, and long-term
 
 The [memory and scheduling roadmap](docs/MEMORY_AND_SCHEDULING_MODEL_ROADMAP.md) describes stage 2 directions and adoption gates: preserve historical events, compare against the deterministic baseline, and provide replay tests, reproducible outputs, and rollback. Uncalibrated scores must not be presented as mastery probabilities or guaranteed score improvements.
 
-Stage 3 is exploratory and does not change the current Core scope. New services, interfaces, and models require separate proposals and review. The [reasoning-evidence design in PR #3](https://github.com/wysking/postgrad-study-engine/pull/3) is also a separate draft, not an active contract or deployed capability.
+Stage 3 has working local entry points; hosted applications remain future scope. New services, interfaces, and models require separate proposals and review. The [reasoning-evidence design in PR #3](https://github.com/wysking/postgrad-study-engine/pull/3) is also a separate draft, not an active contract or deployed capability.
 
 ## Principles & Limitations
 

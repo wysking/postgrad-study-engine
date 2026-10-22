@@ -1,0 +1,96 @@
+{
+  "observed_at": "2026-10-22T11:20:42.868324+08:00",
+  "method": "GitHub connector repository search; default relevance, no quoted phrase or in:readme qualifier",
+  "target": "wysking/postgrad-study-engine",
+  "limitations": [
+    "Only the first returned page is observed; absence is not an exact global rank.",
+    "No total result count or indexing-latency guarantee is available from this response.",
+    "Three user-visible target queries are recorded; no claim about unseen original queries."
+  ],
+  "results": [
+    {
+      "query": "FSRS learning engine",
+      "requested_page": 1,
+      "requested_per_page": 20,
+      "returned_names": [
+        "nagisanzenin/engram",
+        "vellvient/obsidian-learning-engine",
+        "ammmcreativetech-dot/quanta-fsrs-engine",
+        "misty-step/scry",
+        "Kwadjia/mandarin-teacher",
+        "markmcnair/learningos",
+        "maxhengl/lalolearning",
+        "stranske/learning-management-system",
+        "Aley3567/QuizCraft",
+        "wzietak/engineering-thesis-project",
+        "KunskapsHunger/glomskan",
+        "tjokrogunawant-dev/koblio-platform",
+        "kvnloo/obsidian-learning-engine",
+        "qqq694637644/obsidian-learning-engine",
+        "Amelia-Mowers/open-mastery",
+        "Vamonossk/engram-learning",
+        "Kadenvh/cortex-design",
+        "Hasanth-kumar/DSA-Mastery-OS",
+        "animagr/engram",
+        "JNiTMStudio/Pi-Engram"
+      ],
+      "target_rank_in_returned": null
+    },
+    {
+      "query": "evidence-based learning engine",
+      "requested_page": 1,
+      "requested_per_page": 20,
+      "returned_names": [
+        "nagisanzenin/engram",
+        "jchoi92k/Learning-Engineering-Resource-Hub",
+        "windsuzu/engineering-tutor",
+        "devkyato/computer_engineering_shit",
+        "aiagent-sg-2026/web-engineering-foundations",
+        "annefensie/assessment",
+        "AndrikoSW/security-engineering-learning-journey",
+        "shahviraj222/engineering-mastery",
+        "FrostySL/anki-card-forge",
+        "hanselhansel/ai-learning-engine",
+        "stranske/learning-management-system",
+        "juancarlosrial76-code/EVOLVE",
+        "ILRI7512/dsh-autolearn",
+        "Damongu/liuren-classics-lab",
+        "zhang3953396/northstar-english",
+        "Vamonossk/engram-learning",
+        "bedooralmareni/AcneVision",
+        "ryano3/engram",
+        "animagr/engram",
+        "JNiTMStudio/Pi-Engram"
+      ],
+      "target_rank_in_returned": null
+    },
+    {
+      "query": "kaoyan AI",
+      "requested_page": 1,
+      "requested_per_page": 20,
+      "returned_names": [
+        "xiaolei565/aimto408",
+        "patrick-andstar/kaoyan-math-ai",
+        "mcxiaoxiao/kaoyan-navigator-skill",
+        "Laz8Noy/kaoyan408-share",
+        "asdhabdua/bilibili-video-notes-skill",
+        "Ivan001223/kaoyan-copilot",
+        "goodYY12/kaoyan-english-ai-training",
+        "LIziak112/structured-kaoyan-english",
+        "tsukiyou/kaoyan_English1_2010-2025",
+        "xm011-cloud/kaoyan_ai",
+        "reverieach/kaoyan-ai-assistant",
+        "sheriffanakaleaptdh6948-art/kaoyan-804-thermo-zhangyu-kaige",
+        "sjkncs/kaoyan-11408",
+        "buhuikongpan/kaoyan-tutor",
+        "111wukong/kaoyan-math-tutor",
+        "YucongDuan/DIKWP-Kaoyan-StudyOS-2027-V1",
+        "huangfengqwq/huangfeng-exam-tutor",
+        "linyuchao123/Kaoyan-Agent-Workbench",
+        "dingyuana/KaoyanAI",
+        "RainOver925/kaoyan_jingdu_producer"
+      ],
+      "target_rank_in_returned": null
+    }
+  ]
+}
