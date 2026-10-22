@@ -44,9 +44,18 @@ def response_text(response: dict) -> str:
     if not isinstance(response, dict) or response.get("status") != "completed":
         raise ContractError("OpenAI response is incomplete or failed; no evidence was saved")
     pieces = []
-    for item in response.get("output", []):
+    output = response.get("output")
+    if not isinstance(output, list):
+        raise ContractError("OpenAI response output is malformed; no evidence was saved")
+    for item in output:
+        if not isinstance(item, dict):
+            raise ContractError("OpenAI response item is malformed; no evidence was saved")
         if item.get("type") == "message":
-            for content in item.get("content", []):
+            if not isinstance(item.get("content"), list):
+                raise ContractError("OpenAI response message is malformed; no evidence was saved")
+            for content in item["content"]:
+                if not isinstance(content, dict):
+                    raise ContractError("OpenAI response content is malformed; no evidence was saved")
                 if content.get("type") == "refusal":
                     raise ContractError("OpenAI declined this response; no evidence was saved")
                 if content.get("type") == "output_text" and isinstance(content.get("text"), str):
@@ -78,5 +87,7 @@ def openai_teach(context: dict, question: str, model: str, *, transport=None) ->
     except HTTPError as exc:
         # Do not echo response bodies, headers, keys or private input in errors.
         raise ContractError(f"OpenAI request failed with HTTP {exc.code}; no evidence was saved") from None
+    except ContractError:
+        raise
     except (URLError, TimeoutError, OSError, ValueError) as exc:
         raise ContractError(f"OpenAI request failed ({type(exc).__name__}); no evidence was saved") from None

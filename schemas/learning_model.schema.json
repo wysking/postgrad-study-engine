@@ -22,7 +22,7 @@
       "const": "1.0"
     },
     "model_version": {
-      "const": "learning-models-0.1"
+      "const": "learning-models-0.2"
     },
     "model_id": {
       "type": "string",

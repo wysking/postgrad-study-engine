@@ -41,6 +41,7 @@ def fsrs_report(events: list[dict], units, ratings: dict, cutoff: datetime,
         targets = set(spec.get("evidence_targets", []))
         if (e["activity"] not in {"recall", "review"} or not unassisted_observation(e)
                 or "recall" not in targets or targets & {"independent", "transfer", "timed"}
+                or spec.get("status", "active") != "active"
                 or spec.get("subject") != e["subject"]):
             raise ContractError("FSRS rating references an unqualified or non-recall observation")
         if (mapping[e["event_id"]] == 1) != (e["attempt"]["result"] == "incorrect"):

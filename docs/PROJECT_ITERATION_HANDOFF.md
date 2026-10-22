@@ -1,16 +1,17 @@
 # Core change protocol
 
-## Unreleased public learning-loop implementation
+## v0.5.0 public learning-loop implementation
 
-The additive `scripts.study` preview supplies empty-Vault setup, authored
+The additive `scripts.study` entry point supplies empty-Vault setup, authored
 courses, checked archival, daily context, derived recall/skill estimates,
 chronological evaluation, optional FSRS, teaching adapters and local reports.
 Its versioned contracts and examples are independent of assessed 1.0 history.
 The teaching Skill is distributed in `skills/study-tutor`; it is not installed
 into users' accounts by this change. See `LEARNING_MODELS.md` for assumptions,
-adoption and rollback. The change is a proposed implementation pending PR
-review, not a release or deployment. The current VERSION stays at the existing
-release until the separate release step; new model behavior has its own version.
+adoption and rollback. Core/runtime version is 0.5.0; the derived model is
+`learning-models-0.2`. The reproducible synthetic report checks software
+calibration plumbing without claiming human calibration. Publication is gated
+on Core and optional-model CI; private deployment is a separate action.
 
 Each existing private Vault needs reviewed identity/course configuration and
 separate exact-lock adoption. Do not update real evidence, workflow outputs or

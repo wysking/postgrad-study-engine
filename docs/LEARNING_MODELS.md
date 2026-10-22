@@ -1,12 +1,12 @@
 # Experimental learning loop · 自适应学习闭环
 
-This is an **unreleased implementation under review**, not a hosted service or
+This **v0.5.0 experimental implementation** is not a hosted service or
 a claim of improved learning. The existing formal event schema, evidence rules,
 ledger and global scheduler remain unchanged. Each learner uses a private Vault.
 
 ## A complete fictional demo
 
-From this proposed Git checkout, using Python 3.12:
+From the clean v0.5.0 Git checkout, using Python 3.12:
 
 ```sh
 python -m scripts.study demo --vault ../fictional-study-demo
@@ -53,7 +53,8 @@ timezone-aware `--occurred-at`. Add `--delayed-days` only when genuinely measure
 If assessment fields are unknown, use summary-only archival. Do not copy sample
 answers or timings. `retry --request-id ID` preserves the unchanged request; it
 cannot repair a failed payload or bypass a refusal. The CLI checks its local
-receipt, hash and exact archived attempt, not remote GitHub persistence.
+receipt, hash and exact archived attempt or compact record. Remote GitHub
+persistence still needs its own verification.
 
 `today --minutes N` invokes the original scheduler. Without an actual budget,
 it returns suggestions only. Probe suggestions are separate from the formal
@@ -77,8 +78,9 @@ log standard deviation `ln(2)`, and bounds 0.125–365 days. These are versioned
 **modeling assumptions**, not validated population or learner parameters. Sparse
 units shrink to that fixed prior. The 90% interval is conditional on the model,
 prior and discrete grid, not calibrated real-world coverage. The grid is uniform
-in log half-life with the prior center additionally included; weights approximate
-inference numerically. A parameter at a bound is reported explicitly.
+in log half-life with the prior center additionally included; posterior weights
+include log-grid cell widths. Model version `learning-models-0.2` identifies
+this numerical integration. A parameter at a bound is reported explicitly.
 
 Only single-unit atomic recall/review qualifies: registered recall target, no
 independent/transfer/timed targets, clean process, zero assistance, known
@@ -104,6 +106,22 @@ have null metrics. Small samples and fictional data do not establish calibration
 Historical replay cannot show that a different schedule would improve retention
 or save time. The old scheduler emits priorities, not comparable recall
 probabilities; its scores are not passed into Brier calculations.
+
+## Reproducible synthetic calibration check
+
+```sh
+python -m scripts.calibration_check
+```
+
+The [report](CALIBRATION_REPORT_0_5_0.md) fits the first 20 outcomes for each of
+24 fictional learners, freezes parameters and scores the later 20 outcomes.
+It publishes Brier/log-loss, descriptive bins, known-parameter recovery and a
+learner-cluster bootstrap. The stored JSON is independently schema-checked and
+reproduced in tests. This same-law control is **not human calibration** and
+cannot validate effects of a different schedule, learning gains or time savings.
+Real calibration needs appropriately licensed and consented records with the
+required observed conditions, participant-separated temporal evaluation and
+prospective evidence before default model-driven scheduling.
 
 ## Optional FSRS
 

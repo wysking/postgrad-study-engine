@@ -67,6 +67,12 @@ class TeachingTests(unittest.TestCase):
             with self.assertRaises(ContractError):
                 response_text(response)
 
+    def test_malformed_responses_fail_as_contract_errors(self):
+        for output in (None, {}, [None], [{"type": "message", "content": None}],
+                       [{"type": "message", "content": [None]}]):
+            with self.subTest(output=output), self.assertRaises(ContractError):
+                response_text({"status": "completed", "output": output})
+
     def test_api_error_never_echoes_private_body_or_credentials(self):
         def transport(req, timeout):
             raise HTTPError(req.full_url, 429, "fictional-private-error", {}, io.BytesIO(b"fictional-private-body"))
@@ -104,6 +110,12 @@ class FsrsAdapterTests(unittest.TestCase):
         r["ratings"].pop(1)
         with self.assertRaises(ContractError):
             self.run_report(ratings=r)
+
+    def test_archived_units_are_not_fsrs_cards(self):
+        units = copy.deepcopy(COURSE["units"])
+        next(u for u in units if u["unit_id"] == MEMORY)["status"] = "archived"
+        with self.assertRaises(ContractError):
+            fsrs_report(self.events, units, self.ratings, AS_OF, "fictional-a")
 
     def test_boolean_and_duplicate_ratings_are_rejected(self):
         r = copy.deepcopy(self.ratings)

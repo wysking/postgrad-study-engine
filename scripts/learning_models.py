@@ -16,7 +16,7 @@ from typing import Any
 from scripts.contracts import ContractError, parse_datetime, validate_event_sequence
 from scripts.reducer import SOLVING_ACTIVITIES, load_units
 
-MODEL_VERSION = "learning-models-0.1"
+MODEL_VERSION = "learning-models-0.2"
 POLICY = {"prior_half_life_days": 3.0, "log_prior_sigma": math.log(2),
           "minimum_half_life_days": 0.125, "maximum_half_life_days": 365.0,
           "grid_points": 181, "minimum_elapsed_days": 1.0}
@@ -107,6 +107,16 @@ def fit_half_life(samples: list[dict]) -> dict:
     The interval is conditional on this model/prior/grid, not an empirical
     calibration certificate or confidence about a learner's overall mastery.
     """
+    seen = set()
+    for sample in samples:
+        if (not isinstance(sample, dict) or not isinstance(sample.get("event_id"), str)
+                or not sample["event_id"].strip() or sample["event_id"] in seen
+                or type(sample.get("recalled")) is not int or sample["recalled"] not in {0, 1}
+                or isinstance(sample.get("elapsed_days"), bool)
+                or not isinstance(sample.get("elapsed_days"), (int, float))
+                or not math.isfinite(sample["elapsed_days"]) or sample["elapsed_days"] < 1):
+            raise ContractError("half-life samples need unique IDs, observed binary labels and finite elapsed days >= 1")
+        seen.add(sample["event_id"])
     p = POLICY
     low, high = math.log(p["minimum_half_life_days"]), math.log(p["maximum_half_life_days"])
     logs = [low + (high - low) * i / (p["grid_points"] - 1) for i in range(p["grid_points"])]
@@ -119,7 +129,11 @@ def fit_half_life(samples: list[dict]) -> dict:
             loss -= math.log(probability if s["recalled"] else 1 - probability)
         losses.append(loss)
     best = min(range(len(logs)), key=lambda i: (losses[i], i))
-    weights = [math.exp(min(losses) - value) for value in losses]
+    # Integrate the posterior density in log(H). Inserting the exact prior
+    # center makes the grid nonuniform, so equal weights would double-count it.
+    edges = [logs[0], *[(a + b) / 2 for a, b in zip(logs, logs[1:])], logs[-1]]
+    widths = [right - left for left, right in zip(edges, edges[1:])]
+    weights = [math.exp(min(losses) - value) * width for value, width in zip(losses, widths)]
     total = sum(weights)
 
     def quantile(q):
@@ -133,7 +147,7 @@ def fit_half_life(samples: list[dict]) -> dict:
     return {"status": "fitted_uncalibrated" if samples else "prior_only",
             "sample_count": len(samples), "half_life_days": math.exp(logs[best]),
             "model_interval_90_days": [quantile(0.05), quantile(0.95)],
-            "interval_kind": "conditional_grid_posterior_not_calibrated",
+            "interval_kind": "conditional_quadrature_posterior_not_calibrated",
             "fit_method": "bounded_log_half_life_grid_MAP", "at_parameter_bound": best in {0, len(logs) - 1},
             "source_event_ids": [s["event_id"] for s in samples]}
 

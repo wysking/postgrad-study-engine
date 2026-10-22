@@ -1,13 +1,13 @@
 # Scripts
 
-## Unreleased public learning-loop entry point
+## v0.5.0 public learning-loop entry point
 
 Use `python -m scripts.study --help` for initialization, authored courses,
 receipt-verified observation saving, daily context, read-only model fitting and
 evaluation, optional FSRS, teaching adapters and a local HTML report. See
-[the complete guide](../docs/LEARNING_MODELS.md). These development commands
-are not present in the released v0.4.0 tag; all original commands below retain
-their behavior.
+[the complete guide](../docs/LEARNING_MODELS.md). `python -m scripts.calibration_check`
+reproduces the fictional calibration sanity report. Modeling remains experimental;
+existing event contracts stay readable.
 
 Scripts are deterministic support tools, not the primary learning interface.
 

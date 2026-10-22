@@ -15,7 +15,7 @@ from scripts.contracts import ContractError, load_json, load_jsonl
 from scripts.learning_context import (context_for_vault, render_dashboard, render_today,
                                       select_diagnostics, validate_course)
 from scripts.study import (init_vault, install_course, main, record_observation,
-                           run_demo, submit, verify_runtime)
+                           run_demo, submit, verified_receipt, verify_runtime)
 from tests.test_learning_models import AS_OF, COURSE, EVENTS, MEMORY
 
 
@@ -100,6 +100,41 @@ class StudyEntryPointTests(unittest.TestCase):
         context = context_for_vault(self.root, AS_OF)
         self.assertEqual(context["state"]["event_count"], 0)
         self.assertTrue((self.root / "records/study_records.jsonl").exists())
+
+    def test_old_compact_receipt_requires_its_exact_stored_record(self):
+        self.init()
+        submit(self.root, "save_study_record", {"summary": "Fictional observation"}, "fictional-compact")
+        request_path = self.root / "inbox/fictional-compact.json"
+        request = load_json(request_path)
+        record_path = self.root / "records/study_records.jsonl"
+        original = record_path.read_bytes()
+        # Later appends must not invalidate the earlier record's receipt.
+        submit(self.root, "save_study_record", {"summary": "Fictional later observation"})
+        verified_receipt(self.root, request_path, request)
+        record_path.write_bytes(b"")
+        with self.assertRaises(ContractError):
+            verified_receipt(self.root, request_path, request)
+        stored = json.loads(original)
+        stored["summary"] = "Tampered fictional content"
+        record_path.write_text(json.dumps(stored) + "\n", encoding="utf-8")
+        with self.assertRaises(ContractError):
+            verified_receipt(self.root, request_path, request)
+
+    def test_probe_ids_are_namespaced_by_course(self):
+        self.init()
+        context = context_for_vault(self.root, AS_OF)
+        other = copy.deepcopy(COURSE)
+        other["course_id"] = "fictional-another-course"
+        courses = [COURSE, other]
+        registry = {u["unit_id"]: u for u in COURSE["units"]}
+        cfg = load_json(self.root / "config/personal/scheduler.json")
+        result = select_diagnostics(registry, context["state"], context["models"], courses, cfg, AS_OF)
+        candidates = result["candidates"]
+        self.assertEqual(len(candidates), 2 * len(context["diagnostics"]["candidates"]))
+        self.assertEqual(len({c["probe_id"] for c in candidates}), len(candidates))
+        self.assertEqual({c["course_id"] for c in candidates}, {c["course_id"] for c in courses})
+        with self.assertRaises(ContractError):
+            select_diagnostics(registry, context["state"], context["models"], [COURSE, COURSE], cfg, AS_OF)
 
     def test_incomplete_formal_fields_stop_before_submission(self):
         self.init()

@@ -12,17 +12,17 @@
 [![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
 
-**开发预览（未发布）：从空白档案到教学与预测。** 新增统一学习入口、
+**v0.5.0：从空白档案到教学与预测。** 新增统一学习入口、
 九单元虚构课程、14 天重放、可拟合记忆基线、可选 FSRS、先修探针和本地仪表盘。
 每位学习者独立保存档案和模型；预测明确区分先验、未校准拟合与实际证据。
-这些功能位于开发分支，已发布的 v0.4.0 不包含下列新命令。
+已提供可复现的[合成校准检查](docs/CALIBRATION_REPORT_0_5_0.md)；真实人群校准尚未验证。
 
 ```sh
 python -m scripts.study demo --vault ../fictional-study-demo
 python -m scripts.study today --vault ../fictional-study-demo --as-of 2026-08-15T09:00:00Z
 ```
 
-在本开发检出中运行，打开演示目录的 `reports/demo.html`，即可查看
+在干净的 v0.5.0 检出中运行，打开演示目录的 `reports/demo.html`，即可查看
 “独立正确仍缺证据 → 第三天失败 → 辅助与独立表现分开 → 后续复测”的虚构过程。
 演示会拒绝已有目录，不写入真实档案。[运行与模型说明](docs/LEARNING_MODELS.md)
 · [教学 Skill](skills/study-tutor/SKILL.md)。拟合及软件测试不等于已经证明学习效果。
@@ -63,15 +63,16 @@ Postgrad Study Engine 为此提供开放、可复核、可复用的基础设施�
 
 ## Development Status · 版本与进度
 
-**当前公开版本：[v0.4.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.4.0)。** 核心基础设施已建立，可靠性与使用体验仍在持续完善；当前主要提供契约、Python 工具、协议和集成工作流。
+**当前公开版本：[v0.5.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0)。** 核心基础设施已建立，可靠性与使用体验仍在持续完善；当前主要提供契约、Python 工具、协议和集成工作流。
 
 | 公开版本 | 阶段成果 | 发布依据 |
 | --- | --- | --- |
 | v0.3.0 | 建立公共 Core、数据契约、移动请求处理、状态重建与学习调度 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.3.0) |
 | v0.3.1 | 加强独立证据资格、诊断闭环、调度门槛、一致性与失败恢复 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.3.1)、[复核记录](docs/RELEASE_REVIEW_0_3_1.md) |
 | v0.4.0 | 增加独立存储的轻量观察记录，同时保持原有正式事件契约 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.4.0)、[发布说明](docs/RELEASE_NOTES_0_4_0.md) |
+| v0.5.0 | 统一学习入口、个体记忆拟合、可选 FSRS、先修探针、教学适配与合成校准检查 | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0)、[发布与复核](docs/RELEASE_NOTES_0_5_0.md) |
 
-v0.4.0 发布验证记录包含 **136 项使用虚构数据的单元与集成测试**，其中包括 18 项轻量记录边界与恢复检查，并在 Linux、Windows CI 上验证。这是该版本的发布记录；当前运行结果请查看上方 CI。测试验证软件行为，不证明长期学习效果。
+v0.4.0 发布验证记录包含 **136 项使用虚构数据的单元与集成测试**，其中包括 18 项轻量记录边界与恢复检查，并在 Linux、Windows CI 上验证。这是该版本的发布记录；v0.5.0 的复核与边界见[发布记录](docs/RELEASE_REVIEW_0_5_0.md)，当前运行结果请查看上方 CI。测试验证软件行为，不证明长期学习效果。
 
 公共版本发布与私人 Vault 采用是两件事。每个 Vault 以自己的 `engine.lock.json` 锁定精确提交；升级需要独立审核，发布新版不会自动改变使用者的运行版本。完整变化见 [CHANGELOG](CHANGELOG.md)。
 
@@ -101,7 +102,7 @@ ChatGPT 等交互工具负责讲解、提问、观察作答和提出候选错因
 ### 1. 获取已发布版本并验证
 
 ```sh
-git clone --branch v0.4.0 https://github.com/wysking/postgrad-study-engine.git
+git clone --branch v0.5.0 https://github.com/wysking/postgrad-study-engine.git
 cd postgrad-study-engine
 python -m unittest discover -s tests -v
 python -m scripts.validate_events

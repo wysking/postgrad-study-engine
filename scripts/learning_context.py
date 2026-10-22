@@ -81,7 +81,13 @@ def select_diagnostics(registry: dict, state: dict, models: dict, courses: list[
                        config: dict, as_of: datetime, minutes: int | None = None) -> dict:
     if minutes is not None and (isinstance(minutes, bool) or not isinstance(minutes, int) or minutes < 1):
         raise ContractError("minutes must be a positive integer")
-    probes = [p for c in courses for p in validate_course(c)["probes"]]
+    probes, course_ids = [], set()
+    for course in courses:
+        validate_course(course)
+        if course["course_id"] in course_ids:
+            raise ContractError("duplicate installed course identity")
+        course_ids.add(course["course_id"])
+        probes.extend({**probe, "course_id": course["course_id"]} for probe in course["probes"])
     candidates, exclusions = {}, []
     # A pending future check cannot become a completed delayed check today.
     immediate = {t["unit_id"] for t in state["review_queue"] if parse_datetime(t["due_at"]) <= as_of
@@ -121,8 +127,9 @@ def select_diagnostics(registry: dict, state: dict, models: dict, courses: list[
                               "evidence_gap": 1.0 if unknown else 0.0,
                               "exploration": 1.0 / (1 + count),
                               "duration_penalty": -probe["estimated_minutes"] / 60}
-                key = probe["probe_id"]
+                key = probe["course_id"] + ":" + probe["probe_id"]
                 item = {"probe_id": key, "unit_id": uid, "subject": registry[uid]["subject"],
+                        "course_id": probe["course_id"], "source_probe_id": probe["probe_id"],
                         "target_unit_ids": [target], "status": "hypothesis_not_confirmed",
                         "reason": kind, "prompt": probe["prompt"], "distinguishes": probe["distinguishes"],
                         "estimated_minutes": probe["estimated_minutes"], "score_components": components,

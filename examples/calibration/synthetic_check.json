@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "report_id": "15eb1f9f4c5377edc9407a536986f874b126fa1cb14147d9a84d7f21281832db",
+  "model_version": "learning-models-0.2",
+  "data_kind": "synthetic_not_human_validation",
+  "validation_status": "synthetic_sanity_only",
+  "setup": {
+    "learners": 24,
+    "trials_per_learner": 40,
+    "training_trials": 20,
+    "seed": 20261022,
+    "generating_half_lives_days": [
+      0.75,
+      1.5,
+      3,
+      6,
+      12,
+      24
+    ],
+    "intervals_days": [
+      1,
+      2,
+      3,
+      7,
+      14,
+      21
+    ],
+    "same_law_constant_half_life": true
+  },
+  "source_hash": "59dd1f2ac7c43d368755abbdf3197ebc486834e52dae7ead6140b24ba4d63ed9",
+  "evaluation": "fit_first_trials_freeze_parameters_score_later_trials_per_learner",
+  "metrics": {
+    "fitted": {
+      "count": 480,
+      "brier": 0.13112492506899723,
+      "log_loss": 0.3948202914494382,
+      "binned_absolute_calibration_gap": 0.06268091055395439,
+      "calibration_bins": [
+        {
+          "count": 123,
+          "mean_prediction": 0.02126870845204978,
+          "observed_recall": 0.008130081300813009
+        },
+        {
+          "count": 26,
+          "mean_prediction": 0.16118939065320198,
+          "observed_recall": 0.07692307692307693
+        },
+        {
+          "count": 37,
+          "mean_prediction": 0.23281342604408162,
+          "observed_recall": 0.1891891891891892
+        },
+        {
+          "count": 51,
+          "mean_prediction": 0.3518047724655733,
+          "observed_recall": 0.37254901960784315
+        },
+        {
+          "count": 30,
+          "mean_prediction": 0.4498344033988519,
+          "observed_recall": 0.36666666666666664
+        },
+        {
+          "count": 34,
+          "mean_prediction": 0.5623529991749318,
+          "observed_recall": 0.6764705882352942
+        },
+        {
+          "count": 32,
+          "mean_prediction": 0.6420011194887488,
+          "observed_recall": 0.375
+        },
+        {
+          "count": 55,
+          "mean_prediction": 0.766495992394288,
+          "observed_recall": 0.6909090909090909
+        },
+        {
+          "count": 51,
+          "mean_prediction": 0.8517789222509257,
+          "observed_recall": 0.9019607843137255
+        },
+        {
+          "count": 41,
+          "mean_prediction": 0.9275076121736712,
+          "observed_recall": 0.975609756097561
+        }
+      ]
+    },
+    "fixed_prior": {
+      "count": 480,
+      "brier": 0.2031005336372957,
+      "log_loss": 0.6650877634699377,
+      "binned_absolute_calibration_gap": 0.0831551466671503,
+      "calibration_bins": [
+        {
+          "count": 154,
+          "mean_prediction": 0.025027063350480796,
+          "observed_recall": 0.17532467532467533
+        },
+        {
+          "count": 95,
+          "mean_prediction": 0.19842513149602495,
+          "observed_recall": 0.2631578947368421
+        },
+        {
+          "count": 68,
+          "mean_prediction": 0.5,
+          "observed_recall": 0.5588235294117647
+        },
+        {
+          "count": 84,
+          "mean_prediction": 0.6299605249474366,
+          "observed_recall": 0.6071428571428571
+        },
+        {
+          "count": 79,
+          "mean_prediction": 0.7937005259840998,
+          "observed_recall": 0.7341772151898734
+        }
+      ]
+    },
+    "oracle": {
+      "count": 480,
+      "brier": 0.12002047387977553,
+      "log_loss": 0.3670431648878077,
+      "binned_absolute_calibration_gap": 0.0550420648115776,
+      "calibration_bins": [
+        {
+          "count": 133,
+          "mean_prediction": 0.022610477516440394,
+          "observed_recall": 0.007518796992481203
+        },
+        {
+          "count": 44,
+          "mean_prediction": 0.18353967685632833,
+          "observed_recall": 0.045454545454545456
+        },
+        {
+          "count": 30,
+          "mean_prediction": 0.27522761533369616,
+          "observed_recall": 0.26666666666666666
+        },
+        {
+          "count": 23,
+          "mean_prediction": 0.3968502629920499,
+          "observed_recall": 0.391304347826087
+        },
+        {
+          "count": 26,
+          "mean_prediction": 0.4454493590701697,
+          "observed_recall": 0.34615384615384615
+        },
+        {
+          "count": 20,
+          "mean_prediction": 0.5294150131162088,
+          "observed_recall": 0.65
+        },
+        {
+          "count": 54,
+          "mean_prediction": 0.6500776112805817,
+          "observed_recall": 0.5370370370370371
+        },
+        {
+          "count": 45,
+          "mean_prediction": 0.7744574715846437,
+          "observed_recall": 0.8
+        },
+        {
+          "count": 57,
+          "mean_prediction": 0.8600365284855505,
+          "observed_recall": 0.7894736842105263
+        },
+        {
+          "count": 48,
+          "mean_prediction": 0.9440875557428096,
+          "observed_recall": 0.9791666666666666
+        }
+      ]
+    }
+  },
+  "parameter_recovery": {
+    "median_absolute_log_half_life_error": 0.23372318735977676,
+    "conditional_interval_90_coverage": 0.875
+  },
+  "paired_brier_difference": {
+    "mean_fitted_minus_fixed": -0.07197560856829845,
+    "learner_bootstrap_95_interval": [
+      -0.10464103730711656,
+      -0.0412108426294442
+    ],
+    "bootstrap_draws": 1000
+  },
+  "limitations": [
+    "Generated under the same functional law; no human calibration or transfer claim.",
+    "No policy or prior was tuned on this held-out report.",
+    "Synthetic interval coverage is not real-world interval coverage.",
+    "No inference about score gains, time savings or alternative real schedules."
+  ]
+}

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — public learning-loop preview
+## v0.5.0 - 2026-10-22
 
 - Add a single `scripts.study` entry point for safe empty-Vault initialization,
   course registration, observation archival with checked receipts, daily context,
@@ -12,9 +12,18 @@
   opt-in OpenAI Responses teaching adapter and a repository teaching Skill.
 - Add independent learner/course/model/rating contracts, a wholly fictional
   nine-unit example, isolation/qualification/leakage tests and optional-model CI.
-- Preserve 1.0 learning events, the original reducer/scheduler/mobile operations,
-  released runtime versions and all private Vaults. Publication and adoption are
-  separate reviewed steps. No calibrated accuracy or learning-effect claim.
+- Review model numerics: integrate the nonuniform log-half-life grid with cell
+  widths, reject duplicate/invalid observations, and version the derived model
+  as learning-models-0.2. Verify compact receipts against exact stored records,
+  namespace probes across courses and reject malformed API output/archived FSRS units.
+- Publish a reproducible known-law synthetic calibration sanity check with
+  frozen-fit chronological holdouts, baselines, bins and learner-cluster
+  uncertainty. No real-human calibration or learning-effect claim.
+- Include the reviewed post-v0.4.0 main-branch evidence qualification, diagnosis
+  queue, scheduling eligibility and staged-publication fixes documented below.
+- Keep event schema 1.0, historical data/receipts and published tags readable;
+  existing private Vaults require separate reviewed adoption. Publish this exact
+  authorized version only after Core and optional-model CI pass.
 
 ## v0.4.0 - 2026-10-19
 

@@ -34,3 +34,7 @@ class ModelSchemaTests(unittest.TestCase):
         self.validate("learner_identity.schema.json", {"schema_version": "1.0", "learner_id": "fictional-a", "mode": "demo"})
         self.validate("fsrs_ratings.schema.json", {"schema_version": "1.0", "learner_id": "fictional-a", "ratings": [
             {"event_id": "fictional-1", "rating": 3, "source": "observed"}]})
+
+    def test_synthetic_calibration_report(self):
+        from scripts.calibration_check import run_check
+        self.validate("calibration_check.schema.json", run_check(learners=2, trials=8, training_trials=4))

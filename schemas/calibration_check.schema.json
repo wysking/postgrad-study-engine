@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/schemas/calibration_check.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "report_id",
+    "model_version",
+    "data_kind",
+    "validation_status",
+    "setup",
+    "source_hash",
+    "evaluation",
+    "metrics",
+    "parameter_recovery",
+    "paired_brier_difference",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "model_version": {
+      "const": "learning-models-0.2"
+    },
+    "data_kind": {
+      "const": "synthetic_not_human_validation"
+    },
+    "validation_status": {
+      "const": "synthetic_sanity_only"
+    },
+    "setup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "learners",
+        "trials_per_learner",
+        "training_trials",
+        "seed",
+        "generating_half_lives_days",
+        "intervals_days",
+        "same_law_constant_half_life"
+      ],
+      "properties": {
+        "learners": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "trials_per_learner": {
+          "type": "integer",
+          "minimum": 3
+        },
+        "training_trials": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "generating_half_lives_days": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "intervals_days": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "same_law_constant_half_life": {
+          "const": true
+        }
+      }
+    },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "evaluation": {
+      "const": "fit_first_trials_freeze_parameters_score_later_trials_per_learner"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fitted",
+        "fixed_prior",
+        "oracle"
+      ],
+      "properties": {
+        "fitted": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "brier",
+            "log_loss",
+            "binned_absolute_calibration_gap",
+            "calibration_bins"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "brier": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "log_loss": {
+              "type": "number",
+              "minimum": 0
+            },
+            "binned_absolute_calibration_gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "calibration_bins": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count",
+                  "mean_prediction",
+                  "observed_recall"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "mean_prediction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "observed_recall": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "fixed_prior": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "brier",
+            "log_loss",
+            "binned_absolute_calibration_gap",
+            "calibration_bins"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "brier": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "log_loss": {
+              "type": "number",
+              "minimum": 0
+            },
+            "binned_absolute_calibration_gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "calibration_bins": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count",
+                  "mean_prediction",
+                  "observed_recall"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "mean_prediction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "observed_recall": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "oracle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "brier",
+            "log_loss",
+            "binned_absolute_calibration_gap",
+            "calibration_bins"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "brier": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "log_loss": {
+              "type": "number",
+              "minimum": 0
+            },
+            "binned_absolute_calibration_gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "calibration_bins": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count",
+                  "mean_prediction",
+                  "observed_recall"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "mean_prediction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "observed_recall": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameter_recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "median_absolute_log_half_life_error",
+        "conditional_interval_90_coverage"
+      ],
+      "properties": {
+        "median_absolute_log_half_life_error": {
+          "type": "number",
+          "minimum": 0
+        },
+        "conditional_interval_90_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "paired_brier_difference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mean_fitted_minus_fixed",
+        "learner_bootstrap_95_interval",
+        "bootstrap_draws"
+      ],
+      "properties": {
+        "mean_fitted_minus_fixed": {
+          "type": "number"
+        },
+        "learner_bootstrap_95_interval": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "bootstrap_draws": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 4
+    }
+  }
+}

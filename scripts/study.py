@@ -24,6 +24,7 @@ from scripts.learning_models import evaluate_memory
 from scripts.process_inbox import ENGINE_VERSION, _request_hash, process_file
 from scripts.reducer import load_units
 from scripts.teaching import offline_teach, openai_teach
+from scripts.study_records import read_records
 from scripts.validate_engine_lock import validate_engine_lock
 
 CORE_ROOT = Path(__file__).resolve().parents[1]
@@ -123,6 +124,21 @@ def verified_receipt(root: Path, path: Path, request: dict) -> dict:
         matches = [e for e in load_jsonl(root / "events/learning_events.jsonl") if e["event_id"] == event["event_id"]]
         if matches != [event]:
             raise ContractError("receipt does not match one exact archived event")
+    elif request["operation"] == "save_study_record":
+        _, records = read_records(root / "records/study_records.jsonl")
+        matches = [record for record in records if record["record_id"] == request["request_id"]]
+        if (receipt.get("result", {}).get("record_id") != request["request_id"]
+                or receipt["result"].get("record_status") != "stored"
+                or receipt["result"].get("evaluation_status") != "not_requested" or len(matches) != 1):
+            raise ContractError("receipt does not match one stored unassessed record")
+        record = matches[0]
+        metadata = {"schema_version", "record_id", "request_hash", "request_created_at", "received_at", "client"}
+        if ({key: value for key, value in record.items() if key not in metadata} != request["payload"]
+                or record["request_hash"] != receipt["request_hash"]
+                or record["request_created_at"] != request["created_at"]
+                or record["received_at"] != receipt["result"].get("received_at")
+                or record.get("client") != request.get("client")):
+            raise ContractError("stored record payload or identity differs from its request")
     return receipt
 
 

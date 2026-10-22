@@ -38,6 +38,26 @@ class LearningModelTests(unittest.TestCase):
         lo, hi = fit_half_life(successes)["model_interval_90_days"]
         self.assertLess(lo, hi)
 
+    def test_direct_fit_rejects_duplicate_or_invalid_observations(self):
+        valid = {"event_id": "fictional-observed", "elapsed_days": 2, "recalled": 1}
+        with self.assertRaises(ContractError):
+            fit_half_life([valid, valid])
+        for fields in ({"recalled": True}, {"recalled": 2}, {"elapsed_days": float("nan")},
+                       {"elapsed_days": True}, {"elapsed_days": 0.5}, {"event_id": ""}):
+            with self.subTest(fields=fields), self.assertRaises(ContractError):
+                fit_half_life([{**valid, **fields}])
+
+    def test_prior_interval_matches_log_normal_quadrature(self):
+        import math
+        from statistics import NormalDist
+        from scripts.learning_models import POLICY
+        # Bounds are far into the prior tails; allow one grid step of quantization.
+        actual = fit_half_life([])["model_interval_90_days"]
+        for value, q in zip(actual, (0.05, 0.95)):
+            expected = POLICY["prior_half_life_days"] * math.exp(
+                POLICY["log_prior_sigma"] * NormalDist().inv_cdf(q))
+            self.assertLess(abs(math.log(value / expected)), 0.05)
+
     def test_curve_has_half_life_identity_and_decays(self):
         self.assertAlmostEqual(recall_prediction(4, 4), 0.5)
         self.assertEqual(recall_prediction(0, 4), 1)

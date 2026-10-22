@@ -1,18 +1,19 @@
 # Postgrad Study Engine
 
-**Unreleased development preview:** initialize a blank private Vault, run an
+**v0.5.0 experimental learning loop:** initialize a blank private Vault, run an
 authored nine-unit / 14-day fictional learning loop, fit a recall model, evaluate
 chronological predictions, inspect prerequisite probes and open a local HTML
 report. Optional FSRS and an explicit OpenAI teaching adapter are included;
-each learner's evidence and parameters remain separate. These commands are
-development features, **not part of the published v0.4.0 tag**.
+each learner's evidence and parameters remain separate. The reproducible
+[synthetic sanity report](docs/CALIBRATION_REPORT_0_5_0.md) does not establish
+human calibration.
 
 ```sh
 python -m scripts.study demo --vault ../fictional-study-demo
 python -m scripts.study today --vault ../fictional-study-demo --as-of 2026-08-15T09:00:00Z
 ```
 
-Run from this development checkout and open the demo's `reports/demo.html`.
+Run from the clean v0.5.0 checkout and open the demo's `reports/demo.html`.
 See [the learning-loop guide](docs/LEARNING_MODELS.md) and the repository-maintained
 [teaching Skill](skills/study-tutor/SKILL.md). Model fitting and passing software
 tests do not establish calibrated predictions or improved learning outcomes.
@@ -65,15 +66,16 @@ For example, v0.4.0 can preserve an observation that a learner worked on a probl
 
 ## Development Status
 
-**Current public release: [v0.4.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.4.0).** The core infrastructure is established, with reliability and usability still being improved. Current deliverables are contracts, Python tools, protocols, and integration workflows.
+**Current public release: [v0.5.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0).** The core infrastructure is established, with reliability and usability still being improved. Current deliverables are contracts, Python tools, protocols, and integration workflows.
 
 | Release | Milestone | Release evidence |
 | --- | --- | --- |
 | v0.3.0 | Public Core, data contracts, mobile request processing, state rebuilding, and study scheduling | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.3.0) |
 | v0.3.1 | Stronger independent-evidence qualification, diagnosis closure, scheduling gates, consistency, and recovery | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.3.1), [review](docs/RELEASE_REVIEW_0_3_1.md) |
 | v0.4.0 | Separately stored compact observations while preserving formal event contracts | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.4.0), [release notes](docs/RELEASE_NOTES_0_4_0.md) |
+| v0.5.0 | Unified study CLI, learner-specific recall fitting, optional FSRS, prerequisite probes, teaching adapters and synthetic calibration checks | [Release](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0), [release and review](docs/RELEASE_NOTES_0_5_0.md) |
 
-The v0.4.0 release verification records **136 unit and integration tests using fictional data**, including 18 compact-record boundary and recovery checks, with Linux and Windows CI verification. These counts describe that release; see the CI badge for current results. Tests verify software behavior, not long-term learning effects.
+The v0.4.0 release verification records **136 unit and integration tests using fictional data**, including 18 compact-record boundary and recovery checks, with Linux and Windows CI verification. These counts describe that release; see the [v0.5.0 review](docs/RELEASE_REVIEW_0_5_0.md) and CI badge for current verification. Tests verify software behavior, not long-term learning effects.
 
 A public release and its adoption by a private Vault are separate steps. Each Vault pins an exact commit in `engine.lock.json`; upgrades require separate review. Publishing a release does not automatically change a learner's runtime. See the [changelog](CHANGELOG.md).
 
@@ -103,7 +105,7 @@ You need Git and Python; CI uses **Python 3.12**. The runtime uses only the Pyth
 ### 1. Get and verify a published version
 
 ```sh
-git clone --branch v0.4.0 https://github.com/wysking/postgrad-study-engine.git
+git clone --branch v0.5.0 https://github.com/wysking/postgrad-study-engine.git
 cd postgrad-study-engine
 python -m unittest discover -s tests -v
 python -m scripts.validate_events
