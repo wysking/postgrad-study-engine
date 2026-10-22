@@ -28,6 +28,9 @@ outbox/
 *.webp
 *.heic
 
+# Approved public repository artwork
+!docs/assets/social-preview.jpg
+
 # Secrets
 .env
 .env.*
