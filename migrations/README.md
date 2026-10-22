@@ -1,5 +1,15 @@
 # Schema migrations
 
+## Unreleased learning-loop preview
+
+Existing 1.0 events, receipts, reducer and scheduler need no migration. New
+learner identity, course packages and model/rating reports use independent
+contracts; they do not add fields to historical learning events. Existing
+Vaults need a reviewed identity/configuration adoption and an independent lock
+upgrade after a release. The initializer only accepts a new directory. No
+remote workflow persistence or production adoption is performed automatically.
+Removing the preview modules/reports preserves old evidence readability.
+
 Historical learning events are immutable. When a contract must break:
 
 1. add a new schema version and a documented migration;

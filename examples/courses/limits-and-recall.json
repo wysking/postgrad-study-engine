@@ -1,0 +1,270 @@
+{
+  "schema_version": "1.0",
+  "course_id": "fictional-limits-recall",
+  "title": "Fictional limits chapter and recall examples / 虚构极限样板章",
+  "fictional": true,
+  "units": [
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.operations",
+      "subject": "math",
+      "title": "极限中的代数运算",
+      "prerequisites": [],
+      "evidence_targets": [
+        "independent",
+        "transfer"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.factorization",
+      "subject": "math",
+      "title": "因式分解与约分",
+      "prerequisites": [
+        "math.limit.operations"
+      ],
+      "evidence_targets": [
+        "independent",
+        "transfer"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.rationalization",
+      "subject": "math",
+      "title": "根式有理化",
+      "prerequisites": [
+        "math.limit.factorization"
+      ],
+      "evidence_targets": [
+        "independent",
+        "transfer"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.standard_recall",
+      "subject": "math",
+      "title": "标准极限闭卷回忆",
+      "prerequisites": [],
+      "evidence_targets": [
+        "recall",
+        "delayed"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.equivalence_conditions",
+      "subject": "math",
+      "title": "等价无穷小的适用条件",
+      "prerequisites": [
+        "math.limit.operations"
+      ],
+      "evidence_targets": [
+        "recall",
+        "independent",
+        "transfer",
+        "delayed"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.equivalence_solve",
+      "subject": "math",
+      "title": "乘除结构的等价替换",
+      "prerequisites": [
+        "math.limit.equivalence_conditions"
+      ],
+      "evidence_targets": [
+        "independent",
+        "transfer",
+        "delayed"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.additive_boundary",
+      "subject": "math",
+      "title": "相减消去时的等价替换边界",
+      "prerequisites": [
+        "math.limit.equivalence_conditions"
+      ],
+      "evidence_targets": [
+        "independent",
+        "transfer"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "math.limit.mixed",
+      "subject": "math",
+      "title": "根式与三角极限组合",
+      "prerequisites": [
+        "math.limit.rationalization",
+        "math.limit.additive_boundary"
+      ],
+      "evidence_targets": [
+        "independent",
+        "transfer",
+        "timed"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "unit_id": "english.vocab.ephemeral",
+      "subject": "english",
+      "title": "ephemeral：短暂的",
+      "prerequisites": [],
+      "evidence_targets": [
+        "recall",
+        "delayed"
+      ],
+      "estimated_minutes": 8,
+      "status": "active",
+      "tags": [
+        "fictional-demo"
+      ]
+    }
+  ],
+  "probes": [
+    {
+      "probe_id": "fictional-probe-1",
+      "unit_id": "math.limit.operations",
+      "prompt": "求 x→2 时 (x²−4)/(x−2) 的极限，并展示约分条件。",
+      "answer": "4；x≠2 时可约去 x−2。",
+      "distinguishes": [
+        "代数约分条件不清",
+        "计算步骤遗漏"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-2",
+      "unit_id": "math.limit.factorization",
+      "prompt": "将 x³−1 因式分解，再求 x→1 时 (x³−1)/(x−1) 的极限。",
+      "answer": "(x−1)(x²+x+1)，极限为3。",
+      "distinguishes": [
+        "幂差分解漏项",
+        "约分后代入遗漏"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-3",
+      "unit_id": "math.limit.rationalization",
+      "prompt": "求 x→0 时 (√(1+x)−1)/x 的极限，写出有理化后的分母。",
+      "answer": "分母为√(1+x)+1，极限为1/2。",
+      "distinguishes": [
+        "共轭乘法不完整",
+        "代入错误"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-4",
+      "unit_id": "math.limit.standard_recall",
+      "prompt": "闭卷写出 x→0 时 sin(x)/x 的极限及角度单位条件。",
+      "answer": "1；使用弧度。",
+      "distinguishes": [
+        "标准极限未回忆",
+        "适用条件遗漏"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-5",
+      "unit_id": "math.limit.equivalence_conditions",
+      "prompt": "sin x 与 x 等价，是否因此 sin x−x 可以直接替换为0？说明原因。",
+      "answer": "不能；相减会消去主项，等价关系不足以确定差的高阶项。",
+      "distinguishes": [
+        "等价关系适用结构混淆",
+        "相减消去未识别"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-6",
+      "unit_id": "math.limit.equivalence_solve",
+      "prompt": "求 x→0 时 sin(2x)/x 的极限，说明替换依据。",
+      "answer": "2；sin(2x)/(2x)→1。",
+      "distinguishes": [
+        "自变量缩放遗漏",
+        "标准极限条件遗漏"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-7",
+      "unit_id": "math.limit.additive_boundary",
+      "prompt": "求 x→0 时 (sin x−x)/x³ 的极限，说明为什么不能把分子直接替换为0。",
+      "answer": "−1/6；sin x=x−x³/6+o(x³)，一阶项相消。",
+      "distinguishes": [
+        "一阶等价误用于相减",
+        "高阶展开系数错误"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-8",
+      "unit_id": "math.limit.mixed",
+      "prompt": "求 x→0 时 (√(1+x)−1)/sin x 的极限，并说明两次变形。",
+      "answer": "1/2；有理化后使用 x/sin x→1。",
+      "distinguishes": [
+        "有理化不足",
+        "三角极限识别不足"
+      ],
+      "estimated_minutes": 3
+    },
+    {
+      "probe_id": "fictional-probe-9",
+      "unit_id": "english.vocab.ephemeral",
+      "prompt": "闭卷解释 ephemeral，并说出它与 permanent 的关系。",
+      "answer": "ephemeral 指短暂的、转瞬即逝的，与 permanent（永久的）意义相反。",
+      "distinguishes": [
+        "词义未回忆",
+        "近反义关系混淆"
+      ],
+      "estimated_minutes": 3
+    }
+  ]
+}

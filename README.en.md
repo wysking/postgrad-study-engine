@@ -1,5 +1,22 @@
 # Postgrad Study Engine
 
+**Unreleased development preview:** initialize a blank private Vault, run an
+authored nine-unit / 14-day fictional learning loop, fit a recall model, evaluate
+chronological predictions, inspect prerequisite probes and open a local HTML
+report. Optional FSRS and an explicit OpenAI teaching adapter are included;
+each learner's evidence and parameters remain separate. These commands are
+development features, **not part of the published v0.4.0 tag**.
+
+```sh
+python -m scripts.study demo --vault ../fictional-study-demo
+python -m scripts.study today --vault ../fictional-study-demo --as-of 2026-08-15T09:00:00Z
+```
+
+Run from this development checkout and open the demo's `reports/demo.html`.
+See [the learning-loop guide](docs/LEARNING_MODELS.md) and the repository-maintained
+[teaching Skill](skills/study-tutor/SKILL.md). Model fitting and passing software
+tests do not establish calibrated predictions or improved learning outcomes.
+
 [简体中文](README.md) · [English](README.en.md)
 
 **An Open, Evidence-Based Learning Engine**

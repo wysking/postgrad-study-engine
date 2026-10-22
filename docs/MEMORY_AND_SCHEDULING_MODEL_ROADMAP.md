@@ -1,5 +1,20 @@
 # Memory and scheduling model roadmap
 
+## Development implementation (unreleased)
+
+The [learning-loop preview](LEARNING_MODELS.md) now implements a bounded,
+regularized recall baseline, prior-only startup, chronological evaluation,
+observed-task skill risk, explicit-rating FSRS integration and prerequisite
+probe selection. It is independent derived modeling, not a replacement for
+assessed evidence or the global scheduler. No production Vault adopts it
+automatically. Sample sufficiency limits conclusions and model-driven decisions;
+it no longer blocks implementing and testing model tools.
+
+Publication, separately reviewed Vault adoption, future predictive calibration
+and prospective learning-effect evaluation remain distinct gates. The layers
+below are research goals; the existence of this preview does not claim that
+their scientific or deployment gates have been met.
+
 The engine starts with transparent heuristics. A more complex model is allowed
 only when its data requirements, baseline, validation path, and failure behavior
 are explicit.

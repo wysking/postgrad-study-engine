@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased — public learning-loop preview
+
+- Add a single `scripts.study` entry point for safe empty-Vault initialization,
+  course registration, observation archival with checked receipts, daily context,
+  local HTML reporting and read-only model fitting/evaluation.
+- Add an auditable regularized half-life model with prior-only startup and
+  chronological evaluation, observed-task skill-risk summaries and prerequisite
+  probes that keep hypotheses separate from assessed evidence.
+- Add optional pinned py-fsrs integration with explicit observed ratings, an
+  opt-in OpenAI Responses teaching adapter and a repository teaching Skill.
+- Add independent learner/course/model/rating contracts, a wholly fictional
+  nine-unit example, isolation/qualification/leakage tests and optional-model CI.
+- Preserve 1.0 learning events, the original reducer/scheduler/mobile operations,
+  released runtime versions and all private Vaults. Publication and adoption are
+  separate reviewed steps. No calibrated accuracy or learning-effect claim.
+
 ## v0.4.0 - 2026-10-19
 
 - Add `save_study_record`: a compact summary can be archived without assessment

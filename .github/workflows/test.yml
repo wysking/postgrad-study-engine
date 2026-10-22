@@ -24,6 +24,18 @@ jobs:
       - name: Validate empty demo ledger
         run: python -m scripts.validate_events
 
+  optional-models:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install optional model and schema-check dependencies
+        run: python -m pip install -r requirements-models.txt "jsonschema>=4,<5"
+      - name: Exercise real FSRS and independent schemas
+        run: python -m unittest tests.test_teaching_and_fsrs tests.test_model_schemas -v
+
   publish-v0-3-1:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test

@@ -12,6 +12,21 @@
 [![Code license: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
 [![Docs license: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
 
+**开发预览（未发布）：从空白档案到教学与预测。** 新增统一学习入口、
+九单元虚构课程、14 天重放、可拟合记忆基线、可选 FSRS、先修探针和本地仪表盘。
+每位学习者独立保存档案和模型；预测明确区分先验、未校准拟合与实际证据。
+这些功能位于开发分支，已发布的 v0.4.0 不包含下列新命令。
+
+```sh
+python -m scripts.study demo --vault ../fictional-study-demo
+python -m scripts.study today --vault ../fictional-study-demo --as-of 2026-08-15T09:00:00Z
+```
+
+在本开发检出中运行，打开演示目录的 `reports/demo.html`，即可查看
+“独立正确仍缺证据 → 第三天失败 → 辅助与独立表现分开 → 后续复测”的虚构过程。
+演示会拒绝已有目录，不写入真实档案。[运行与模型说明](docs/LEARNING_MODELS.md)
+· [教学 Skill](skills/study-tutor/SKILL.md)。拟合及软件测试不等于已经证明学习效果。
+
 ChatGPT 可以解释一道题，但看懂解释、提示后完成和独立求解，代表不同的学习证据。一次正确也不足以证明长期保持。学习者需要一个能保留真实学习经历、追踪错误与复习依据，并在证据不足时明确保留未知的系统。
 
 Postgrad Study Engine 为此提供开放、可复核、可复用的基础设施：交互层负责教学，Core 负责验证与确定性处理，私人 Vault 保存学习证据和配置。考研是起点；长期目标是让经过验证的学习证据在模型、设备和交互工具变化后，仍尽可能可理解、可迁移、可审查。

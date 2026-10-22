@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "$id": "https://postgrad-study-engine.local/schemas/learning_model.schema.json",
+  "required": [
+    "schema_version",
+    "model_version",
+    "model_id",
+    "learner_id",
+    "training_cutoff",
+    "source_hash",
+    "policy",
+    "calibration_status",
+    "memory",
+    "skill_risks",
+    "sample_audit",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "model_version": {
+      "const": "learning-models-0.1"
+    },
+    "model_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "learner_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "training_cutoff": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "policy": {
+      "type": "object"
+    },
+    "calibration_status": {
+      "const": "not_validated"
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "status",
+          "sample_count",
+          "half_life_days",
+          "model_interval_90_days",
+          "anchor",
+          "predicted_recall",
+          "source_event_ids"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "prior_only",
+              "fitted_uncalibrated"
+            ]
+          },
+          "sample_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "half_life_days": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "predicted_recall": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "model_interval_90_days": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "source_event_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "skill_risks": {
+      "type": "object"
+    },
+    "sample_audit": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "included",
+        "excluded"
+      ],
+      "properties": {
+        "included": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "excluded": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
