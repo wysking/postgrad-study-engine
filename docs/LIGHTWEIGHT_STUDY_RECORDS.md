@@ -14,6 +14,14 @@ also limited to 12000 characters). Optional `occurred_at` needs an ISO datetime
 with timezone. `occurred_on` is a real YYYY-MM-DD date. Supply at most one;
 missing observed time stays absent.
 
+Since v0.5.1, input `subject` is also accepted as an alias for `subject_label`.
+The processor normalizes a copy into the stored `subject_label`; it never edits
+the original request or changes its canonical request hash. If both names are
+present, their nonblank string values must be identical. Conflicts fail rather
+than silently choosing one. This alias is descriptive only; it does not register
+a subject, create an assessment, or add a learner requirement. Stored records
+still use only `subject_label` and the original 1.0 record schema.
+
 The stored-record Schema is `schemas/study_record.schema.json`; its `$defs.payload`
 describes input fields. Runtime callers use `validate_study_record_payload` and
 the isolated full inbox entry point. The request-envelope validator alone is
@@ -62,6 +70,10 @@ A matching succeeded receipt includes `record_id`, `record_status: stored`,
 `evaluation_status: not_requested`, `record_index_status` and the index path.
 The hash algorithm is the existing canonical mobile-request algorithm, not a
 new raw-file-byte identity rule. Preserve the whole original request on retry.
+
+Installing an alias-compatible runtime does not turn an existing failed receipt
+into success. Historical failed requests remain unchanged and are not retried
+automatically. Use the Vault's reviewed, case-specific correction procedure.
 
 For a remote deployment, records and outbox must be staged in the same Git
 commit. The client verifies that remote receipt's ID, operation, available

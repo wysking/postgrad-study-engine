@@ -11,6 +11,24 @@ from tests.test_learning_models import AS_OF, COURSE, EVENTS
 
 @unittest.skipUnless(find_spec("jsonschema"), "optional jsonschema is not installed")
 class ModelSchemaTests(unittest.TestCase):
+    def test_study_subject_alias_is_input_only_in_independent_schema(self):
+        import jsonschema
+        schema = json.loads((Path(__file__).resolve().parents[1] / 'schemas/study_record.schema.json').read_text())
+        payload_schema = {'$schema': schema['$schema'], '$defs': schema['$defs'], '$ref': '#/$defs/payload'}
+        for fields in ({}, {'subject': 'Fictional subject'}, {'subject_label': 'Fictional subject'},
+                       {'subject': 'Fictional subject', 'subject_label': 'Fictional subject'}):
+            jsonschema.Draft202012Validator(payload_schema).validate({'summary': 'Fictional observation.', **fields})
+        for subject in (None, False, [], ' ', 'x' * 12001):
+            with self.assertRaises(jsonschema.ValidationError):
+                jsonschema.Draft202012Validator(payload_schema).validate({'summary': 'Fictional', 'subject': subject})
+        record = {'schema_version': '1.0', 'record_id': 'fictional-schema', 'request_hash': 'a' * 64,
+                  'request_created_at': '2026-01-01T00:00:00Z', 'received_at': '2026-01-01T00:00:01Z',
+                  'summary': 'Fictional observation.', 'subject_label': 'Fictional subject'}
+        self.validate('study_record.schema.json', record)
+        record['subject'] = record['subject_label']
+        with self.assertRaises(jsonschema.ValidationError):
+            self.validate('study_record.schema.json', record)
+
     def validate(self, filename, payload):
         import jsonschema
         from referencing import Registry, Resource

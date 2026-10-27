@@ -67,14 +67,14 @@
 | 记忆拟合、可选 FSRS 与技能参考 | v0.5.0 实验能力；真实学习效果和人群校准待验证 |
 | 定期 GPT 阅读记录并更新文字画像 | 提供[接入方案](docs/EVERYDAY_LEARNING.md)；需在自己的 AI 与存储环境单独配置 |
 
-当前发布版本是 [v0.5.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0)。本仓库提供 Python 工具、文档和集成方式；账号服务、GitHub 云端归档和定时 GPT 任务需要各自接入。下载代码不会自动开启这些服务。
+当前发布版本是 [v0.5.1](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.1)。本仓库提供 Python 工具、文档和集成方式；账号服务、GitHub 云端归档和定时 GPT 任务需要各自接入。下载代码不会自动开启这些服务。
 
 ## 先体验一次
 
 需要 Git 和 Python 3.12。基础运行使用 Python 标准库。
 
 ```sh
-git clone --branch v0.5.0 https://github.com/wysking/postgrad-study-engine.git
+git clone --branch v0.5.1 https://github.com/wysking/postgrad-study-engine.git
 cd postgrad-study-engine
 python -m scripts.study demo --vault ../fictional-study-demo
 ```

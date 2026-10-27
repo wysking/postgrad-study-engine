@@ -37,7 +37,7 @@ from scripts.scheduler import build_schedule
 from scripts.study_records import INDEX_RELATIVE as RECORD_INDEX_RELATIVE, RECORDS_RELATIVE, save_record
 
 
-ENGINE_VERSION = "0.5.0"
+ENGINE_VERSION = "0.5.1"
 EVENTS_RELATIVE = Path("events") / "learning_events.jsonl"
 UNITS_RELATIVE = Path("state") / "knowledge_units.json"
 DERIVED_STATE_RELATIVE = Path("state") / "derived_state.json"

@@ -67,14 +67,14 @@ The public **Core** supplies reusable tools. Each learner's **Vault** stores the
 | Recall fitting, optional FSRS and skill references | Experimental v0.5.0 capabilities; human calibration and learning effects remain unverified |
 | Periodic GPT reading and written context updates | A [setup pattern](docs/EVERYDAY_LEARNING.md#english-setup-guide); configure it separately in your AI and storage environment |
 
-The current release is [v0.5.0](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.0). Deliverables are Python tools, documentation and integration patterns. Hosted accounts, GitHub archival workflows and scheduled GPT tasks require separate setup; downloading the code does not activate those services.
+The current release is [v0.5.1](https://github.com/wysking/postgrad-study-engine/releases/tag/v0.5.1). Deliverables are Python tools, documentation and integration patterns. Hosted accounts, GitHub archival workflows and scheduled GPT tasks require separate setup; downloading the code does not activate those services.
 
 ## Try it first
 
 You need Git and Python 3.12. The baseline runtime uses the Python standard library.
 
 ```sh
-git clone --branch v0.5.0 https://github.com/wysking/postgrad-study-engine.git
+git clone --branch v0.5.1 https://github.com/wysking/postgrad-study-engine.git
 cd postgrad-study-engine
 python -m scripts.study demo --vault ../fictional-study-demo
 ```

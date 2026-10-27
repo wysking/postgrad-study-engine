@@ -279,9 +279,18 @@ def validate_mobile_request(request: Any) -> dict[str, Any]:
 def validate_study_record_payload(payload: Any) -> dict[str, Any]:
     """Validate compact observations without requiring an assessment."""
     payload = _require_mapping(payload, "study_record.payload")
-    allowed = {"summary", "subject_label", "topic", "source_ref", "occurred_at", "occurred_on"}
+    allowed = {"summary", "subject", "subject_label", "topic", "source_ref", "occurred_at", "occurred_on"}
     _reject_extra(payload, allowed, "study_record.payload")
     _require_keys(payload, ("summary",), "study_record.payload")
+    # Normalize a copy: the original transport payload still determines its hash.
+    payload = dict(payload)
+    if "subject" in payload:
+        subject = payload.pop("subject")
+        if not isinstance(subject, str) or not subject.strip() or len(subject) > 12000:
+            raise ContractError("study_record.subject must be a non-empty string up to 12000 characters")
+        if "subject_label" in payload and payload["subject_label"] != subject:
+            raise ContractError("study_record.subject and subject_label conflict")
+        payload["subject_label"] = subject
     for key in ("summary", "subject_label", "topic", "source_ref"):
         if key in payload:
             value = payload[key]
