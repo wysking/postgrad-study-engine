@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.1 - 2026-10-27
+
+- Accept `subject` as an input alias for the descriptive `subject_label` in
+  `save_study_record`; normalize a copy while preserving original request hashes.
+- Verify CLI receipts against the same normalized payload. Equal aliases work;
+  conflicting or invalid values fail without overwriting evidence or receipts.
+- Keep stored record/event Schema 1.0, formal assessment and scheduler behavior
+  unchanged. Existing failed receipts are not automatically replayed or changed.
+- Publish only the reviewed v0.5.1 runtime after Core and optional-model CI;
+  each private Vault adopts the exact release in a separate lock-only PR.
+
 ## v0.5.0 - 2026-10-22
 
 - Add a single `scripts.study` entry point for safe empty-Vault initialization,

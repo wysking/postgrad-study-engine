@@ -101,6 +101,20 @@ class StudyEntryPointTests(unittest.TestCase):
         self.assertEqual(context["state"]["event_count"], 0)
         self.assertTrue((self.root / "records/study_records.jsonl").exists())
 
+    def test_subject_alias_receipt_is_verified_against_normalized_record(self):
+        self.init(course=False)
+        receipt = submit(self.root, "save_study_record", {"summary": "Fictional observation.",
+                         "subject": "Fictional subject"}, "fictional-alias")
+        path = self.root / "inbox/fictional-alias.json"
+        request = load_json(path)
+        self.assertEqual(receipt["status"], "succeeded")
+        self.assertEqual(verified_receipt(self.root, path, request), receipt)
+        self.assertIn("subject", request["payload"])
+        rows = [json.loads(line) for line in (self.root / "records/study_records.jsonl").read_text().splitlines()]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["subject_label"], "Fictional subject")
+        self.assertNotIn("subject", rows[0])
+
     def test_old_compact_receipt_requires_its_exact_stored_record(self):
         self.init()
         submit(self.root, "save_study_record", {"summary": "Fictional observation"}, "fictional-compact")

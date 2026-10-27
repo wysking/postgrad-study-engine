@@ -2,14 +2,14 @@
 
 [简体中文首页](../README.md) · [English README](../README.en.md)
 
-v0.5.0 supplies a local learning entry point. Use Git and Python 3.12. It does
+v0.5.1 supplies a local learning entry point. Use Git and Python 3.12. It does
 not install hosted automation; an existing Vault follows its own reviewed
-upgrade process. / v0.5.0 提供本地学习入口；已有 Vault 单独审核升级。
+upgrade process. / v0.5.1 提供本地学习入口；已有 Vault 单独审核升级。
 
 ## 1. Verify a clean release checkout · 验证发布检出
 
 ```sh
-git clone --branch v0.5.0 https://github.com/wysking/postgrad-study-engine.git
+git clone --branch v0.5.1 https://github.com/wysking/postgrad-study-engine.git
 cd postgrad-study-engine
 python -m unittest discover -s tests -v
 python -m scripts.validate_events

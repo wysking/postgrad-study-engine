@@ -1,5 +1,19 @@
 # Schema migrations
 
+## v0.5.1 study-record input compatibility
+
+No stored-data migration is needed. `save_study_record` now accepts `subject`
+as an input alias for `subject_label`; both present must contain the same valid
+string. New stored records retain the existing `subject_label` representation
+and hash the original transport request. Formal event subjects are unchanged.
+Old records and receipts remain readable and retain their original bytes.
+
+After release, adopt the exact commit in a reviewed lock-only Vault PR. A
+previous failed request stays failed; an approved case-specific correction
+preserves the original request/receipt and saves the original factual content
+once. Do not rewrite history, automatically retry all failures, or blindly
+downgrade after accepting requests that use the new input alias.
+
 ## v0.5.0 learning-loop adoption
 
 Existing 1.0 events, receipts, reducer and scheduler need no migration. New

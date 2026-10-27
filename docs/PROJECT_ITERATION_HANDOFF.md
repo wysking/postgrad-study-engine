@@ -1,5 +1,14 @@
 # Core change protocol
 
+## v0.5.1 study-record input alias
+
+The additive patch accepts `subject` as a descriptive `subject_label` alias for
+open records and uses the same normalization during CLI receipt verification.
+Raw requests and hashes remain immutable; persisted record and formal event
+contracts remain 1.0. Historical failed receipts are never auto-replayed.
+Tests use only fictional isolated observations. Publication requires complete
+Core and optional-model CI; every Vault adopts the exact release separately.
+
 ## v0.5.0 public learning-loop implementation
 
 The additive `scripts.study` entry point supplies empty-Vault setup, authored

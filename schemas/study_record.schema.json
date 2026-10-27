@@ -28,6 +28,7 @@
       "required": ["summary"],
       "properties": {
         "summary": {"$ref": "#/$defs/text"},
+        "subject": {"$ref": "#/$defs/text", "description": "Input alias for subject_label since v0.5.1. If both are present, runtime requires equal strings. Stored records use subject_label only."},
         "subject_label": {"$ref": "#/$defs/text"},
         "topic": {"$ref": "#/$defs/text"},
         "source_ref": {"$ref": "#/$defs/text"},

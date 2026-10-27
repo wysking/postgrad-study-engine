@@ -15,6 +15,71 @@ from tests.fictional_release_vault import FictionalMobileVault, START, NEXT_DAY
 
 
 class StudyRecordTests(FictionalMobileVault):
+    def test_subject_alias_is_saved_canonically_without_mutating_request_or_hash(self):
+        path = self.write_request(payload={"summary": "Fictional observed algebra work.",
+                                           "subject": "Fictional unregistered subject",
+                                           "topic": "Fictional algebra"})
+        before = path.read_bytes()
+        request = json.loads(before)
+        raw_hash = process_inbox._request_hash(request)
+        normalized = validate_study_record_payload(request["payload"])
+        self.assertIn("subject", request["payload"])
+        self.assertNotIn("subject_label", request["payload"])
+        self.assertEqual(normalized["subject_label"], request["payload"]["subject"])
+        response = process_inbox.process_file(self.root, path)
+        self.assertEqual(response["status"], "succeeded")
+        self.assertEqual(response["request_hash"], raw_hash)
+        row = self.record_rows()[0]
+        self.assertEqual(row["subject_label"], request["payload"]["subject"])
+        self.assertNotIn("subject", row)
+        self.assertEqual(row["summary"], request["payload"]["summary"])
+        self.assertEqual(row["request_hash"], raw_hash)
+        self.assertEqual(path.read_bytes(), before)
+        replay = process_inbox.process_file(self.root, path)
+        self.assertEqual(replay, response)
+        self.assertEqual(len(self.record_rows()), 1)
+
+    def test_equal_subject_names_are_accepted_and_conflicts_or_bad_types_are_rejected(self):
+        path = self.write_request(payload={"summary": "Fictional observation.",
+                                           "subject": "Fictional subject", "subject_label": "Fictional subject"})
+        self.assertEqual(process_inbox.process_file(self.root, path)["status"], "succeeded")
+        for number, fields in enumerate((
+            {"subject": "Fictional A", "subject_label": "Fictional B"},
+            {"subject": " "}, {"subject": False}, {"subject": None},
+            {"subject": "x" * 12001}, {"subject": ["Fictional subject"]},
+        )):
+            with self.subTest(fields=fields):
+                path = self.write_request(f"fictional-invalid-alias-{number}", {"summary": "Fictional observation.", **fields})
+                self.assertEqual(process_inbox.process_file(self.root, path)["status"], "failed")
+        self.assertEqual(len(self.record_rows()), 1)
+
+    def test_alias_does_not_make_conflicting_same_id_requests_equivalent(self):
+        path = self.write_request(payload={"summary": "Fictional observation.", "subject": "Fictional subject"})
+        response = process_inbox.process_file(self.root, path)
+        row_bytes = (self.root / study_records.RECORDS_RELATIVE).read_bytes()
+        receipt_bytes = (self.root / 'outbox/fictional-note.json').read_bytes()
+        self.write_request(payload={"summary": "Fictional observation.", "subject_label": "Fictional subject"})
+        with self.assertRaises(ContractError):
+            process_inbox.process_file(self.root, path)
+        self.assertEqual((self.root / study_records.RECORDS_RELATIVE).read_bytes(), row_bytes)
+        self.assertEqual((self.root / 'outbox/fictional-note.json').read_bytes(), receipt_bytes)
+        self.assertEqual(response["status"], "succeeded")
+
+    def test_alias_stays_input_only_and_does_not_accept_formal_assessment_fields(self):
+        from scripts.contracts import validate_study_record, validate_learning_event
+        path = self.write_request(payload={"summary": "Fictional observation.", "subject": "Fictional subject"})
+        self.assertEqual(process_inbox.process_file(self.root, path)["status"], "succeeded")
+        row = self.record_rows()[0]
+        row["subject"] = row.pop("subject_label")
+        with self.assertRaises(ContractError):
+            validate_study_record(row)
+        with self.assertRaises(ContractError):
+            validate_study_record_payload({"summary": "Fictional", "subject": "Fictional", "assistance_level": 0})
+        with self.assertRaises(ContractError):
+            event = self.attempt()
+            event["subject_label"] = event["subject"]
+            validate_learning_event(event)
+
     def write_request(self, name="fictional-note", payload=None):
         request = {
             "schema_version": "1.0", "request_id": name, "created_at": START,

@@ -133,7 +133,7 @@ def verified_receipt(root: Path, path: Path, request: dict) -> dict:
             raise ContractError("receipt does not match one stored unassessed record")
         record = matches[0]
         metadata = {"schema_version", "record_id", "request_hash", "request_created_at", "received_at", "client"}
-        if ({key: value for key, value in record.items() if key not in metadata} != request["payload"]
+        if ({key: value for key, value in record.items() if key not in metadata} != validate_study_record_payload(request["payload"])
                 or record["request_hash"] != receipt["request_hash"]
                 or record["request_created_at"] != request["created_at"]
                 or record["received_at"] != receipt["result"].get("received_at")

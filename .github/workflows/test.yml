@@ -158,14 +158,14 @@ jobs:
           [[ "$release_status" == "200" ]]
           verify_release
 
-  publish-v0-5-0:
+  publish-v0-5-1:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [test, optional-models]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     concurrency:
-      group: release-v0.5.0
+      group: release-v0.5.1
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -174,7 +174,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Publish only the authorized v0.5.0 release
+      - name: Publish only the authorized v0.5.1 release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -182,8 +182,8 @@ jobs:
         run: |
           set -euo pipefail
           release_version=$(tr -d '\r\n' < VERSION)
-          if [[ "$release_version" != "0.5.0" ]]; then
-            echo "This job publishes only v0.5.0; skipping."
+          if [[ "$release_version" != "0.5.1" ]]; then
+            echo "This job publishes only v0.5.1; skipping."
             exit 0
           fi
           if [[ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ]] || [[ "$(python -c 'from scripts.process_inbox import ENGINE_VERSION; print(ENGINE_VERSION)')" != "$release_version" ]]; then
@@ -223,14 +223,14 @@ jobs:
               echo "Existing release tag has a conflicting version."
               exit 1
             fi
-            echo "v0.5.0 is already published; preserving its exact tag and release."
+            echo "v0.5.1 is already published; preserving its exact tag and release."
             exit 0
           fi
           if git show-ref --verify --quiet "refs/tags/$tag"; then
             echo "An existing tag without a final release requires review; refusing to overwrite it."
             exit 1
           fi
-          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file docs/RELEASE_NOTES_0_5_0.md
+          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file docs/RELEASE_NOTES_0_5_1.md
           git fetch origin "refs/tags/$tag:refs/tags/$tag"
           tag_commit=$(git rev-parse --verify "$tag^{commit}")
           if [[ "$tag_commit" != "$GITHUB_SHA" ]]; then
