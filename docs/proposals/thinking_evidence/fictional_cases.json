@@ -1,0 +1,1517 @@
+{
+  "fixtures": "fictional-only",
+  "anchor": {
+    "schema_version": "1.0",
+    "event_id": "fictional-attempt-001",
+    "timestamp": "2026-08-10T09:00:00Z",
+    "event_type": "attempt",
+    "subject": "math",
+    "unit_ids": [
+      "math.fictional.symbolic_relation"
+    ],
+    "activity": "solve",
+    "attempt": {
+      "question_id": "fictional-question-001",
+      "result": "partial",
+      "answer_mode": "assisted",
+      "process_check": "clean",
+      "assistance_level": 1,
+      "evidence": "Fictional learner formed a relation after a condition cue."
+    }
+  },
+  "base_observation": {
+    "schema_version": "1.1",
+    "event_id": "fictional-observation-001",
+    "timestamp": "2026-08-10T09:10:00Z",
+    "event_type": "process_observation",
+    "subject": "math",
+    "unit_ids": [
+      "math.fictional.symbolic_relation"
+    ],
+    "observation": {
+      "trace_id": "fictional-trace-001",
+      "anchor_event_id": "fictional-attempt-001",
+      "question_id": "fictional-question-001",
+      "observed_at": null,
+      "capture_mode": "diagnostic",
+      "scope": "local_steps",
+      "order_basis": "observed_sequence",
+      "relevant_prior_exposure": "known",
+      "exposure_event_ids": [],
+      "question_familiarity": "unknown",
+      "collector_version": "unknown",
+      "coding_policy_version": "thinking-coding-draft-0.1",
+      "steps": [
+        {
+          "step_id": "s1",
+          "kind": "key_derivation",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "evidence": "Fictional learner wrote a=b+c.",
+          "source": {
+            "kind": "learner_work",
+            "ref": "fictional-draft:001",
+            "locator": "line-2",
+            "representation": "faithful_summary",
+            "uncertainty": []
+          },
+          "dimensions": [
+            "derivation_completeness"
+          ],
+          "elicitation": "instructional_hint",
+          "assistance_level": 1,
+          "intervention_id": "h1",
+          "basis_event_ids": [
+            "fictional-attempt-001"
+          ],
+          "verification": {
+            "status": "source_checked",
+            "evidence_event_ids": []
+          }
+        }
+      ],
+      "interventions": [
+        {
+          "intervention_id": "h1",
+          "kind": "condition_cue",
+          "level": 1,
+          "summary": "Fictional cue to use the given condition.",
+          "before_step_id": "s1"
+        }
+      ],
+      "links": []
+    }
+  },
+  "cases": [
+    {
+      "name": "valid_observed_local_step",
+      "valid": true,
+      "changes": []
+    },
+    {
+      "name": "valid_unknown_order_and_help",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "order_basis"
+          ],
+          "value": "unknown"
+        },
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "unknown",
+              "assistance_level": null,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "valid_retrospective_report",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "retrospective_self_report",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "learner_report_confirmed",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "valid_inference_kept_unverified",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "system_inference",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "unverified",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "valid_uncertain_transcription_unverified",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": [
+                  "Fictional symbol unclear."
+                ]
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "unverified",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_unknown_anchor",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "anchor_event_id"
+          ],
+          "value": "fictional-missing"
+        }
+      ]
+    },
+    {
+      "name": "reject_subject_mismatch",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "subject"
+          ],
+          "value": "english"
+        }
+      ]
+    },
+    {
+      "name": "reject_question_mismatch",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "question_id"
+          ],
+          "value": "fictional-other"
+        }
+      ]
+    },
+    {
+      "name": "reject_scope_outside_anchor",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "unit_ids"
+          ],
+          "value": [
+            "math.fictional.other"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_step_outside_scope",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.other"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_boolean_assistance",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps",
+            0,
+            "assistance_level"
+          ],
+          "value": true
+        }
+      ]
+    },
+    {
+      "name": "reject_negative_assistance",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": -1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_long_fragment",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_full_chat_field",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "messages"
+          ],
+          "value": [
+            {
+              "role": "user",
+              "content": "Fictional"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_inference_as_source_fact",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "system_inference",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_unchecked_ambiguous_fact",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": [
+                  "Fictional unclear symbol."
+                ]
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_missing_intervention",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "missing",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_duplicate_local_step",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            },
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_unknown_behavior_reference",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "behavior_supported",
+                "evidence_event_ids": [
+                  "fictional-missing"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_empty_behavior_support",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "behavior_supported",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_future_observation_time",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "observed_at"
+          ],
+          "value": "2026-08-11T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "reject_timezone_free_timestamp",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "timestamp"
+          ],
+          "value": "2026-08-10T09:10:00"
+        }
+      ]
+    },
+    {
+      "name": "reject_reused_event_id",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "event_id"
+          ],
+          "value": "fictional-attempt-001"
+        }
+      ]
+    },
+    {
+      "name": "reject_nonexistent_revision",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "supersedes_event_id"
+          ],
+          "value": "missing"
+        }
+      ]
+    },
+    {
+      "name": "reject_retest_of_unrelated_unit",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "links"
+          ],
+          "value": [
+            {
+              "relation": "retest_of",
+              "target_event_id": "fictional-other-attempt",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "status": "verified",
+              "basis": "Fictional invalid link."
+            }
+          ]
+        }
+      ],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-other-attempt",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.other"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "reject_far_without_changed_features",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "links"
+          ],
+          "value": [
+            {
+              "relation": "transfer_from",
+              "target_event_id": "fictional-prior-000",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "status": "verified",
+              "basis": "Fictional transfer candidate.",
+              "transfer_distance": "far_reviewed"
+            }
+          ]
+        }
+      ],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-prior-000",
+          "timestamp": "2026-08-10T08:50:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-prior-question",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "valid_linear_revision",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "event_id"
+          ],
+          "value": "fictional-observation-002"
+        },
+        {
+          "path": [
+            "timestamp"
+          ],
+          "value": "2026-08-10T09:11:00Z"
+        },
+        {
+          "path": [
+            "observation",
+            "supersedes_event_id"
+          ],
+          "value": "fictional-observation-001"
+        }
+      ],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.1",
+          "event_id": "fictional-observation-001",
+          "timestamp": "2026-08-10T09:10:00Z",
+          "event_type": "process_observation",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "observation": {
+            "trace_id": "fictional-trace-001",
+            "anchor_event_id": "fictional-attempt-001",
+            "question_id": "fictional-question-001",
+            "observed_at": null,
+            "capture_mode": "diagnostic",
+            "scope": "local_steps",
+            "order_basis": "observed_sequence",
+            "relevant_prior_exposure": "known",
+            "exposure_event_ids": [],
+            "question_familiarity": "unknown",
+            "collector_version": "unknown",
+            "coding_policy_version": "thinking-coding-draft-0.1",
+            "steps": [
+              {
+                "step_id": "s1",
+                "kind": "key_derivation",
+                "unit_ids": [
+                  "math.fictional.symbolic_relation"
+                ],
+                "evidence": "Fictional learner wrote a=b+c.",
+                "source": {
+                  "kind": "learner_work",
+                  "ref": "fictional-draft:001",
+                  "locator": "line-2",
+                  "representation": "faithful_summary",
+                  "uncertainty": []
+                },
+                "dimensions": [
+                  "derivation_completeness"
+                ],
+                "elicitation": "instructional_hint",
+                "assistance_level": 1,
+                "intervention_id": "h1",
+                "basis_event_ids": [
+                  "fictional-attempt-001"
+                ],
+                "verification": {
+                  "status": "source_checked",
+                  "evidence_event_ids": []
+                }
+              }
+            ],
+            "interventions": [
+              {
+                "intervention_id": "h1",
+                "kind": "condition_cue",
+                "level": 1,
+                "summary": "Fictional cue to use the given condition.",
+                "before_step_id": "s1"
+              }
+            ],
+            "links": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "reject_unlinked_trace_reuse",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "event_id"
+          ],
+          "value": "fictional-observation-002"
+        }
+      ],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.1",
+          "event_id": "fictional-observation-001",
+          "timestamp": "2026-08-10T09:10:00Z",
+          "event_type": "process_observation",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "observation": {
+            "trace_id": "fictional-trace-001",
+            "anchor_event_id": "fictional-attempt-001",
+            "question_id": "fictional-question-001",
+            "observed_at": null,
+            "capture_mode": "diagnostic",
+            "scope": "local_steps",
+            "order_basis": "observed_sequence",
+            "relevant_prior_exposure": "known",
+            "exposure_event_ids": [],
+            "question_familiarity": "unknown",
+            "collector_version": "unknown",
+            "coding_policy_version": "thinking-coding-draft-0.1",
+            "steps": [
+              {
+                "step_id": "s1",
+                "kind": "key_derivation",
+                "unit_ids": [
+                  "math.fictional.symbolic_relation"
+                ],
+                "evidence": "Fictional learner wrote a=b+c.",
+                "source": {
+                  "kind": "learner_work",
+                  "ref": "fictional-draft:001",
+                  "locator": "line-2",
+                  "representation": "faithful_summary",
+                  "uncertainty": []
+                },
+                "dimensions": [
+                  "derivation_completeness"
+                ],
+                "elicitation": "instructional_hint",
+                "assistance_level": 1,
+                "intervention_id": "h1",
+                "basis_event_ids": [
+                  "fictional-attempt-001"
+                ],
+                "verification": {
+                  "status": "source_checked",
+                  "evidence_event_ids": []
+                }
+              }
+            ],
+            "interventions": [
+              {
+                "intervention_id": "h1",
+                "kind": "condition_cue",
+                "level": 1,
+                "summary": "Fictional cue to use the given condition.",
+                "before_step_id": "s1"
+              }
+            ],
+            "links": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "reject_duplicate_historical_identity",
+      "valid": false,
+      "changes": [],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "reject_teacher_solution_origin",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "tutor_solution",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_invented_ability_score",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "ability_score"
+          ],
+          "value": 0.97
+        }
+      ]
+    },
+    {
+      "name": "reject_missing_fragment",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "source_checked",
+                "evidence_event_ids": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reject_negative_integer_delay_surrogate",
+      "valid": false,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "delayed_days"
+          ],
+          "value": 7
+        }
+      ]
+    },
+    {
+      "name": "valid_separate_behavior_support",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "steps"
+          ],
+          "value": [
+            {
+              "step_id": "s1",
+              "kind": "key_derivation",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "evidence": "Fictional learner wrote a=b+c.",
+              "source": {
+                "kind": "learner_work",
+                "ref": "fictional-draft:001",
+                "locator": "line-2",
+                "representation": "faithful_summary",
+                "uncertainty": []
+              },
+              "dimensions": [
+                "derivation_completeness"
+              ],
+              "elicitation": "instructional_hint",
+              "assistance_level": 1,
+              "intervention_id": "h1",
+              "basis_event_ids": [
+                "fictional-attempt-001"
+              ],
+              "verification": {
+                "status": "behavior_supported",
+                "evidence_event_ids": [
+                  "fictional-independent-002"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-independent-002",
+          "timestamp": "2026-08-10T09:05:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-002",
+            "result": "correct",
+            "answer_mode": "independent",
+            "process_check": "clean",
+            "assistance_level": 0,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "valid_scoped_retest_link",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "links"
+          ],
+          "value": [
+            {
+              "relation": "retest_of",
+              "target_event_id": "fictional-prior-000",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "status": "verified",
+              "basis": "Fictional target and timing checked."
+            }
+          ]
+        }
+      ],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-prior-000",
+          "timestamp": "2026-08-10T08:50:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-prior-question",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "valid_scoped_near_transfer_link",
+      "valid": true,
+      "changes": [
+        {
+          "path": [
+            "observation",
+            "links"
+          ],
+          "value": [
+            {
+              "relation": "transfer_from",
+              "target_event_id": "fictional-prior-000",
+              "unit_ids": [
+                "math.fictional.symbolic_relation"
+              ],
+              "status": "verified",
+              "basis": "Fictional task comparison reviewed.",
+              "transfer_distance": "near",
+              "changed_features": [
+                "representation"
+              ]
+            }
+          ]
+        }
+      ],
+      "history": [
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-prior-000",
+          "timestamp": "2026-08-10T08:50:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-prior-question",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        },
+        {
+          "schema_version": "1.0",
+          "event_id": "fictional-attempt-001",
+          "timestamp": "2026-08-10T09:00:00Z",
+          "event_type": "attempt",
+          "subject": "math",
+          "unit_ids": [
+            "math.fictional.symbolic_relation"
+          ],
+          "activity": "solve",
+          "attempt": {
+            "question_id": "fictional-question-001",
+            "result": "partial",
+            "answer_mode": "assisted",
+            "process_check": "clean",
+            "assistance_level": 1,
+            "evidence": "Fictional learner formed a relation after a condition cue."
+          }
+        }
+      ]
+    }
+  ]
+}
