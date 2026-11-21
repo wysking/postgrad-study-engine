@@ -1,0 +1,42 @@
+name: Bug Report / 问题反馈
+description: Report a reproducible bug in the Core CLI, schemas, reducer, or scheduler (using fictional data only).
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Privacy Notice / 隐私提醒**: Please use **fictional data only**. Do not paste personal study records, private Vault paths, or copyrighted course materials.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened? / 问题描述
+      description: A clear and concise description of the bug.
+      placeholder: Describe the unexpected behavior...
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce / 复现步骤
+      description: Minimal commands or fictional JSON payload to reproduce the issue.
+      placeholder: |
+        1. Run `python -m scripts.study ...`
+        2. Observe error...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior / 预期行为
+      placeholder: What should have happened instead?
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment / 运行环境
+      description: OS, Python version, and Core version/commit.
+      placeholder: "e.g. Ubuntu 24.04 / Windows 11, Python 3.12, v0.5.1"
+    validations:
+      required: true
