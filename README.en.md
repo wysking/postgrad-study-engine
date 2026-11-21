@@ -68,6 +68,7 @@ The biggest loss in AI-assisted self-study isn't missing an explanation—it's *
 ---
 
 <a id="highlights"></a>
+
 ## 🧩 Highlights
 
 <table>
@@ -96,6 +97,7 @@ The biggest loss in AI-assisted self-study isn't missing an explanation—it's *
 ---
 
 <a id="architecture"></a>
+
 ## 🔄 How It Works
 
 ```mermaid
@@ -116,6 +118,7 @@ flowchart LR
 ---
 
 <a id="memory"></a>
+
 ## 🗂️ Three-Layer Memory Architecture
 
 Logging and analysis stay cleanly decoupled—**saving facts never waits on downstream analysis**, keeping everyday study fast while deeper reviews run on their own schedule:
@@ -150,6 +153,7 @@ Logging and analysis stay cleanly decoupled—**saving facts never waits on down
 ---
 
 <a id="quickstart"></a>
+
 ## ⚡ Quick Start
 
 Requires only **Git** and **Python 3.12** (zero third-party runtime dependencies—pure standard library):
@@ -166,6 +170,7 @@ python -m scripts.study demo --vault ../study-demo
 ---
 
 <a id="modes"></a>
+
 ## 🚀 Ways to Run
 
 Initialize a blank private Vault with the [first-time setup guide](docs/GETTING_STARTED.md), then pick or combine the modes that fit your workflow:
@@ -205,6 +210,7 @@ Initialize a blank private Vault with the [first-time setup guide](docs/GETTING_
 ---
 
 <a id="docs"></a>
+
 ## 📚 Documentation
 
 | Topic | Recommended Reading |

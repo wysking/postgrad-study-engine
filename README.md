@@ -68,6 +68,7 @@
 ---
 
 <a id="features"></a>
+
 ## 🧩 核心特性
 
 <table>
@@ -96,6 +97,7 @@
 ---
 
 <a id="architecture"></a>
+
 ## 🔄 系统闭环
 
 ```mermaid
@@ -116,6 +118,7 @@ flowchart LR
 ---
 
 <a id="memory"></a>
+
 ## 🗂️ 三层记忆架构
 
 记录与分析彻底解耦——**保存事实不依赖分析成功**，日常学习零等待，后台分析按需运行：
@@ -150,6 +153,7 @@ flowchart LR
 ---
 
 <a id="quickstart"></a>
+
 ## ⚡ 1 分钟快速体验
 
 仅需 **Git** 与 **Python 3.12**（核心引擎基于 Python 标准库，零第三方依赖）：
@@ -166,6 +170,7 @@ python -m scripts.study demo --vault ../study-demo
 ---
 
 <a id="modes"></a>
+
 ## 🚀 三种接入模式
 
 按照 [首次接入指南](docs/GETTING_STARTED.md) 创建你的空白私有 Vault 后，可按需选择或组合以下模式：
@@ -205,6 +210,7 @@ python -m scripts.study demo --vault ../study-demo
 ---
 
 <a id="docs"></a>
+
 ## 📚 文档导航
 
 | 想了解什么 | 推荐阅读 |
