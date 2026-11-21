@@ -1,55 +1,158 @@
-# Postgrad Study Engine
+<div align="center">
 
-[简体中文](README.md) · [English](README.en.md)
+<img src="docs/assets/social-preview.jpg" alt="Postgrad Study Engine" width="100%" />
+
+<br />
+<br />
+
+# Postgrad Study Engine
 
 **Turn every question and derivation into structured memory for your next study session.**
 
-An open-source, Git-backed AI study engine for postgraduate entrance exams and long-term self-study. Ask questions naturally, preserve real problem-solving steps in an append-only ledger, generate periodic source-linked learner profiles, and run deterministic forgetting-curve and priority scheduling models on demand.
+<sub>Open-source, Git-backed AI study engine for postgraduate exams & long-term self-study · Open Records · Periodic Profiles · Recall Modeling · Constrained Scheduling</sub>
 
-[Highlights](#highlights) · [How It Works](#how-it-works) · [Quick Start](#quick-start) · [Set Up Your Vault](docs/GETTING_STARTED.md) · [Everyday & Cloud Setup](docs/EVERYDAY_LEARNING.md#english-setup-guide)
+<br />
 
-[![Release](https://img.shields.io/github/v/release/wysking/postgrad-study-engine)](https://github.com/wysking/postgrad-study-engine/releases)
-[![Core tests](https://img.shields.io/github/actions/workflow/status/wysking/postgrad-study-engine/test.yml?branch=main&label=Core%20tests)](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml)
-[![Code: MIT](https://img.shields.io/badge/Code-MIT-green)](LICENSE)
-[![Docs: CC BY 4.0](https://img.shields.io/badge/Docs-CC_BY_4.0-lightgrey)](LICENSE-DOCS-CC-BY-4.0)
+[![Release](https://img.shields.io/github/v/release/wysking/postgrad-study-engine?style=flat-square&color=C83E2B&labelColor=1C1C1E)](https://github.com/wysking/postgrad-study-engine/releases)
+[![Core Tests](https://img.shields.io/github/actions/workflow/status/wysking/postgrad-study-engine/test.yml?branch=main&style=flat-square&label=Core%20Tests&labelColor=1C1C1E)](https://github.com/wysking/postgrad-study-engine/actions/workflows/test.yml)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12%20%C2%B7%20Zero%20Deps-3776AB?style=flat-square&labelColor=1C1C1E)](scripts/study.py)
+[![Code: MIT](https://img.shields.io/badge/Code-MIT-2E7D32?style=flat-square&labelColor=1C1C1E)](LICENSE)
+[![Docs: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-555555?style=flat-square&labelColor=1C1C1E)](LICENSE-DOCS-CC-BY-4.0)
 
-![Postgrad Study Engine: learning records and continuity](docs/assets/social-preview.jpg)
+<br />
 
-## Highlights
+[简体中文](README.md) · **English**
+&nbsp;&nbsp;|&nbsp;&nbsp;
+[Highlights](#highlights) · [How It Works](#architecture) · [Memory Architecture](#memory) · [Quick Start](#quickstart) · [Ways to Run](#modes) · [Docs](#docs)
 
-- **Frictionless Capture, Rich Detail**: Everyday logging defaults to open study records (`save_study_record`) with no rigid forms—keep straightforward solutions brief, and preserve full reasoning, hint sequences, mistakes, and corrections whenever they matter.
-- **Clean Core / Vault Separation**: This public Core provides reusable contracts, validation, state rebuilding, and scheduling; your personal notes, raw ledgers, and learner profiles live in your own private Vault, portable across devices and AI clients.
-- **Serverless Cloud Loop**: Run locally via CLI or pair a private GitHub Vault with GitHub Actions and a native cloud bridge (such as Google Drive read-only mirrors + Gmail Drafts + scheduled Apps Script sync) for mobile tutoring, automatic archival, and overnight qualitative reviews—no hosted backend, no paid LLM API required.
-- **Auditable & Rebuildable Foundation**: Append-only ledgers, idempotent request deduplication, exact same-ID receipts, deterministic state rebuilds, plus optional forgetting-curve fitting, FSRS support, and multi-subject constrained scheduling.
+</div>
 
-## How It Works
+---
 
-```text
-  Everyday Study Chat (Mobile / Desktop AI)
-        │
-        ▼  Save observed work naturally (save_study_record / structured events)
-  Private Git Vault (inbox → serialized Actions validation → append-only ledgers + outbox receipts)
-        │
-        ├──▶ Periodic Qualitative Review: links multi-turn progress and updates learner_context.md
-        └──▶ Deterministic Modeling & Scheduling: rebuilds unit state, due queues, and HTML reports
-        │
-        ▼  Sync latest profile & state context
-  Next Session Picks Up Right Where You Left Off
+## ✨ Why Postgrad Study Engine?
+
+The biggest loss in AI-assisted self-study isn't missing an explanation—it's **forgetting everything the moment you open a new chat window**.
+
+<table>
+  <thead>
+    <tr>
+      <th width="22%">Dimension</th>
+      <th width="39%">Ordinary AI Chat Practice</th>
+      <th width="39%">Postgrad Study Engine</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Long-Term Memory</b></td>
+      <td>Scattered across dozens of threads; every new chat starts from scratch</td>
+      <td>Accumulates in your private Git ledger and loads a fresh learner profile at session start</td>
+    </tr>
+    <tr>
+      <td><b>Logging Friction</b></td>
+      <td>Manual note-taking breaks flow, or insights vanish completely</td>
+      <td>Captures real problem-solving naturally—brief for easy wins, rich for multi-step derivations</td>
+    </tr>
+    <tr>
+      <td><b>Mastery Signal</b></td>
+      <td>Reading a solution, assisted fixes, and solo solves blur together</td>
+      <td>Strictly separates independent solving, assisted work, and confirmed error diagnoses</td>
+    </tr>
+    <tr>
+      <td><b>Portability</b></td>
+      <td>History locked inside one vendor's chat interface</td>
+      <td>Public Core + private Git Vault in plain JSON/Markdown—portable across devices & models</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+<a id="highlights"></a>
+## 🧩 Highlights
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>01 · Frictionless Capture, Rich Detail</h3>
+      <p>Everyday logging defaults to open study records (<code>save_study_record</code>) with zero form fatigue. Keep direct answers concise, and retain initial attempts, hint sequences, local mistakes, and self-corrections whenever they occur.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>02 · Clean Core / Vault Separation</h3>
+      <p>This public Core provides reusable contracts, validation, state rebuilding, and scheduling. Your personal profile, raw ledgers, and derived insights stay in your own private Vault—switching devices or AI clients never resets your progress.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>03 · Serverless Cloud Loop</h3>
+      <p>Run locally with the CLI or pair a private GitHub Vault with GitHub Actions and a native cloud bridge (Google Drive read-only mirrors + Gmail Drafts + scheduled Apps Script sync) for mobile tutoring, automatic archival, and overnight reviews—no hosted server or paid LLM API required.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>04 · Auditable & Rebuildable Core</h3>
+      <p>Append-only ledgers, idempotent request deduplication, exact same-ID outbox receipts, and serialized publishing—paired with deterministic state rebuilds, constrained multi-subject scheduling, optional recall fitting, and FSRS support.</p>
+    </td>
+  </tr>
+</table>
+
+---
+
+<a id="architecture"></a>
+## 🔄 How It Works
+
+```mermaid
+flowchart LR
+    A["Everyday Study Chat (Mobile / Desktop AI)"] -->|"save_study_record / events"| B["Ingestion (Gmail + Apps Script / CLI)"]
+    B -->|"inbox request"| C["Private Git Vault (Actions + Append-Only Ledgers)"]
+    C --> D["Periodic Qualitative Review (learner_context.md)"]
+    C --> E["Deterministic Models & Scheduler (Recall + HTML Dashboard)"]
+    D -->|"Latest profile"| F["Next Session Picks Up Seamlessly"]
+    E -->|"Prioritized due work"| F
+    F --> A
+
+    style A fill:#1C1C1E,stroke:#555555,color:#F5F5F5
+    style C fill:#C83E2B,stroke:#9E2F20,color:#FFFFFF
+    style F fill:#1C1C1E,stroke:#C83E2B,color:#F5F5F5
 ```
 
-### Three Composable Layers
+---
 
-| Layer | What It Stores or Produces | When to Use |
-| --- | --- | --- |
-| **Open Study Records** (`records/study_records.jsonl`) | Problem context, actual steps, hint order, mistakes, corrections, and observed timing | Everyday logging with zero form overhead |
-| **Qualitative Learner Context** (`analysis/learner_context.md` / `daily/`) | Cross-session progress, recurring pitfalls, effective explanation styles, and open questions | Daily or weekly scheduled reviews loaded at conversation start |
-| **Formal Evidence & Models** (`events/` / `state/` / `exports/`) | Structured attempt and diagnosis events, multi-dimensional evidence, recall risk, and schedules | Targeted diagnostics, transfer checks, and global review planning |
+<a id="memory"></a>
+## 🗂️ Three-Layer Memory Architecture
 
-> **Logging and analysis stay cleanly decoupled**: saving facts never waits on downstream analysis, and assisted completions remain distinct from independent solving so long-term feedback stays faithful.
+Logging and analysis stay cleanly decoupled—**saving facts never waits on downstream analysis**, keeping everyday study fast while deeper reviews run on their own schedule:
 
-## Quick Start
+| Layer | Files | What It Preserves or Produces | Cadence |
+| :--- | :--- | :--- | :--- |
+| **L1 · Open Study Records** | `records/study_records.jsonl` | Problem context, real steps, hint order, mistakes, corrections, and observed timing | Saved effortlessly during study |
+| **L2 · Qualitative Learner Profile** | `analysis/learner_context.md`<br>`analysis/daily/YYYY-MM-DD.md` | Cross-session progress, recurring pitfalls, effective explanation styles, and source citations | Daily or weekly review; loaded at session start |
+| **L3 · Formal Evidence & Models** | `events/learning_events.jsonl`<br>`state/` · `exports/` | Structured attempts and diagnoses distinguishing solo vs. assisted work, recall risk, and schedules | Targeted diagnostics, transfer checks, and planning |
 
-Requires Git and Python 3.12 (the core runtime uses only the Python standard library):
+<details>
+<summary><b>👀 Peek at a real open study record payload (clean, human-readable, zero boilerplate)</b></summary>
+
+```json
+{
+  "schema_version": "1.0",
+  "request_id": "mobile-20261121-math-chain-rule-001",
+  "created_at": "2026-11-21T20:15:00+08:00",
+  "operation": "save_study_record",
+  "client": "mobile",
+  "payload": {
+    "summary": "Practised composite-function differentiation. Omitted the inner derivative on the first pass; after a chain-rule hint, completed the full derivation accurately and restated the outer-to-inner expansion order.",
+    "subject_label": "math",
+    "topic": "Composite derivatives & chain rule",
+    "occurred_on": "2026-11-21"
+  }
+}
+```
+
+</details>
+
+---
+
+<a id="quickstart"></a>
+## ⚡ Quick Start
+
+Requires only **Git** and **Python 3.12** (zero third-party runtime dependencies—pure standard library):
 
 ```sh
 git clone --branch v0.5.1 https://github.com/wysking/postgrad-study-engine.git
@@ -57,39 +160,66 @@ cd postgrad-study-engine
 python -m scripts.study demo --vault ../study-demo
 ```
 
-Open `../study-demo/reports/demo.html` to explore a 14-day sample study timeline covering independent solving, assisted corrections, error diagnosis, state rebuilding, and prioritized review queues.
+> [!TIP]
+> Open `../study-demo/reports/demo.html` to explore a 14-day sample study dashboard featuring independent solves, assisted fixes, error diagnosis closure, rebuilt unit evidence, and prioritized review queues.
 
-## Ways to Run
+---
 
-Initialize a private Vault using the [first-time setup guide](docs/GETTING_STARTED.md), then pick the workflow that fits you best:
+<a id="modes"></a>
+## 🚀 Ways to Run
 
-- **Local CLI**: Use `python -m scripts.study` to save notes, inspect due work, and export standalone HTML reports.
-- **Mobile Cloud Loop**: Let private Vault GitHub Actions validate `inbox/*.json` requests and emit same-ID receipts; pair with Google Drive / Gmail + Apps Script for seamless mobile AI tutoring and automatic archival.
-- **Scheduled Qualitative Review**: Run a periodic review job over your accumulated ledgers to publish daily reviews and refresh `analysis/learner_context.md` for future sessions.
+Initialize a blank private Vault with the [first-time setup guide](docs/GETTING_STARTED.md), then pick or combine the modes that fit your workflow:
 
-See the [everyday learning & review guide](docs/EVERYDAY_LEARNING.md#english-setup-guide) for full setup instructions.
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h4>💻 Local CLI</h4>
+      <p>Zero-dependency Python runtime. Use <code>python -m scripts.study</code> to save records, rebuild state, inspect due work, and export standalone HTML dashboards.</p>
+      <p><a href="docs/GETTING_STARTED.md">Local setup guide →</a></p>
+    </td>
+    <td width="33%" valign="top">
+      <h4>📱 Mobile Cloud Loop (Recommended)</h4>
+      <p>Pair your private Vault with GitHub Actions single-writer workflows and a <b>Google Drive mirror + Gmail Draft + Apps Script</b> 5-minute bridge for seamless mobile tutoring and overnight reviews.</p>
+      <p><a href="docs/EVERYDAY_LEARNING.md#english-setup-guide">Cloud setup guide →</a></p>
+    </td>
+    <td width="33%" valign="top">
+      <h4>🔧 Custom Integrations</h4>
+      <p>9 structured <code>inbox</code> operations with full JSON Schemas—connect any AI client, define custom subject prerequisites, or plug in authored diagnostic probes.</p>
+      <p><a href="docs/MOBILE_REQUESTS.md">Request contracts →</a></p>
+    </td>
+  </tr>
+</table>
 
-## Capabilities (v0.5.1)
+---
+
+## 📦 Capabilities (v0.5.1)
 
 | Area | What Is Included |
-| --- | --- |
-| Open Study Records | Lightweight `save_study_record` logging with free-form summary, subject label, topic, and source provenance |
-| Formal Evidence & Diagnosis | Separates independent work, assisted steps, and diagnosis revisions with isomorphic and transfer checks |
-| Cross-Device Request Protocol | 9 structured `inbox` operations with idempotent deduplication, single-writer concurrency, and `outbox` receipts |
-| Modeling & Scheduling | Deterministic state rebuilding, constrained multi-subject priority scheduling, optional recall fitting and FSRS |
-| Reporting & Tooling | CLI entrypoint, compact context capsules, standalone HTML learning dashboard, and full unit test suite |
+| :--- | :--- |
+| **Open Study Records** | Lightweight `save_study_record` persistence with free-form summary, subject label, topic, source reference, and date |
+| **Evidence & Diagnosis Loop** | Separates solo solves, assisted fixes, guesses, and diagnosis revisions with isomorphic & transfer verification |
+| **Cross-Device Request Protocol** | 9 structured `inbox` operations with idempotent deduplication, single-writer concurrency, and exact `outbox` receipts |
+| **State, Models & Scheduling** | Deterministic state rebuilding, multi-subject constrained priority scheduling, optional recall fitting, and FSRS support |
+| **Reporting & Test Suite** | Unified CLI, compact context capsules, standalone HTML dashboard, and comprehensive unit test coverage |
 
-## Documentation
+---
 
-| Topic | Links |
-| --- | --- |
-| Getting Started & Everyday Flow | [First-Time Setup](docs/GETTING_STARTED.md) · [Everyday Learning & Review](docs/EVERYDAY_LEARNING.md#english-setup-guide) |
-| Cloud Sync & Request Contracts | [Cross-Device Workflow](docs/MOBILE_DESKTOP_WORKFLOW.md) · [Mobile Requests](docs/MOBILE_REQUESTS.md) · [Open Records Contract](docs/LIGHTWEIGHT_STUDY_RECORDS.md) |
-| Data Models & Scheduler | [Data Contracts](docs/DATA_CONTRACTS.md) · [Schemas](schemas/README.md) · [Learning Models](docs/LEARNING_MODELS.md) · [Global Scheduler](docs/GLOBAL_SCHEDULER.md) |
-| Releases & Contributing | [Changelog](CHANGELOG.md) · [Model Roadmap](docs/MEMORY_AND_SCHEDULING_MODEL_ROADMAP.md) · [Repository Rules](AGENTS.md) |
+<a id="docs"></a>
+## 📚 Documentation
 
-## Contributing & License
+| Topic | Recommended Reading |
+| :--- | :--- |
+| **Getting Started & Daily Loop** | [First-Time Setup](docs/GETTING_STARTED.md) · [Everyday Learning & Review](docs/EVERYDAY_LEARNING.md#english-setup-guide) |
+| **Cloud Sync & Request Contracts** | [Cross-Device Workflow](docs/MOBILE_DESKTOP_WORKFLOW.md) · [Mobile Requests](docs/MOBILE_REQUESTS.md) · [Open Records Contract](docs/LIGHTWEIGHT_STUDY_RECORDS.md) |
+| **Data Models & Scheduler** | [Data Contracts](docs/DATA_CONTRACTS.md) · [Schemas](schemas/README.md) · [Learning Models](docs/LEARNING_MODELS.md) · [Global Scheduler](docs/GLOBAL_SCHEDULER.md) |
+| **Releases & Contributing** | [Changelog](CHANGELOG.md) · [Model Roadmap](docs/MEMORY_AND_SCHEDULING_MODEL_ROADMAP.md) · [Repository Rules](AGENTS.md) |
 
-Feedback, [Issues](https://github.com/wysking/postgrad-study-engine/issues), and [Pull Requests](https://github.com/wysking/postgrad-study-engine/pulls) are welcome.
+---
 
-Code is licensed under [MIT](LICENSE); documentation, protocols, and schemas are licensed under [CC BY 4.0](LICENSE-DOCS-CC-BY-4.0). Third-party attributions are listed in [NOTICE.md](NOTICE.md).
+<div align="center">
+
+Feedback, [Issues](https://github.com/wysking/postgrad-study-engine/issues), and [Pull Requests](https://github.com/wysking/postgrad-study-engine/pulls) are always welcome.
+
+Code licensed under [MIT](LICENSE) · Documentation, protocols & schemas under [CC BY 4.0](LICENSE-DOCS-CC-BY-4.0) · Attributions in [NOTICE.md](NOTICE.md)
+
+</div>
