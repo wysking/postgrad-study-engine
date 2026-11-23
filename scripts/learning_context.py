@@ -223,27 +223,258 @@ def render_today(context: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _render_memory_svg(memory_models: dict, units: dict, esc) -> str:
+    """Render a zero-JS, pure inline SVG forgetting-curve chart from real fitted models."""
+    fitted = []
+    colors = ("#C83E2B", "#1F6FEB", "#2E7D32", "#8250DF")
+    for uid, m in memory_models.items():
+        curve = m.get("curve_if_recalled_now")
+        if m.get("status") != "fitted_uncalibrated" or not curve:
+            continue
+        title = units.get(uid, {}).get("title") or uid
+        hl = m.get("half_life_days")
+        fitted.append((uid, title, hl, m.get("sample_count", 0), curve))
+    if not fitted:
+        return "<div class='empty'>尚无足够延迟复习样本拟合遗忘曲线 / Add delayed reviews to fit recall curves.</div>"
+
+    w, h = 500, 210
+    pad_l, pad_r, pad_t, pad_b = 42, 18, 16, 30
+    pw, ph = w - pad_l - pad_r, h - pad_t - pad_b
+    max_day = max(max(pt["days"] for pt in item[4]) for item in fitted) or 14
+
+    def sx(day: float) -> float:
+        return pad_l + (day / max_day) * pw
+
+    def sy(prob: float) -> float:
+        return pad_t + (1.0 - max(0.0, min(1.0, prob))) * ph
+
+    grid = []
+    for pct in (0, 25, 50, 75, 100):
+        y = sy(pct / 100.0)
+        dash = " stroke-dasharray='3,3'" if pct not in (0, 100) else ""
+        grid.append(f"<line x1='{pad_l}' y1='{y:.1f}' x2='{w - pad_r}' y2='{y:.1f}' stroke='#E5E7EB' stroke-width='1'{dash}/>")
+        grid.append(f"<text x='{pad_l - 8}' y='{y + 4:.1f}' text-anchor='end' font-size='10' fill='#6B7280'>{pct}%</text>")
+    for d in (0, 1, 3, 7, 14):
+        if d <= max_day:
+            x = sx(d)
+            grid.append(f"<text x='{x:.1f}' y='{h - 8}' text-anchor='middle' font-size='10' fill='#6B7280'>D+{d}</text>")
+
+    paths = []
+    legend = []
+    curve_rows = []
+    for idx, (_uid, title, hl, n_samples, curve) in enumerate(fitted[:4]):
+        color = colors[idx % len(colors)]
+        pts = [(0.0, 1.0)] + [(float(pt["days"]), float(pt["predicted_recall"])) for pt in curve]
+        d_str = " ".join(f"{'M' if i == 0 else 'L'}{sx(dx):.1f},{sy(py):.1f}" for i, (dx, py) in enumerate(pts))
+        paths.append(f"<path d='{d_str}' fill='none' stroke='{color}' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/>")
+        for dx, py in pts[1:]:
+            paths.append(f"<circle cx='{sx(dx):.1f}' cy='{sy(py):.1f}' r='3.5' fill='white' stroke='{color}' stroke-width='2'/>")
+        hl_txt = f"t½ ≈ {hl:.1f}天" if isinstance(hl, (int, float)) else ""
+        legend.append(
+            f"<div class='leg-item'><span class='dot' style='background:{color}'></span>"
+            f"<strong>{esc(title)}</strong><span class='muted'> {esc(hl_txt)} · n={esc(n_samples)}</span></div>"
+        )
+        day_map = {int(pt["days"]): int(round(float(pt["predicted_recall"]) * 100)) for pt in curve}
+        interval = memory_models[_uid].get("model_interval_90_days")
+        ci_txt = f"{interval[0]:.1f}–{interval[1]:.1f}天" if isinstance(interval, list) and len(interval) == 2 else "—"
+        curve_rows.append(
+            "<tr>"
+            f"<td><span class='dot' style='background:{color};margin-right:6px'></span><strong>{esc(title)}</strong></td>"
+            f"<td>{esc(f'{hl:.1f}天' if isinstance(hl, (int, float)) else '—')} <span class='muted'>({esc(ci_txt)})</span></td>"
+            f"<td>{esc(day_map.get(1, '—'))}%</td>"
+            f"<td>{esc(day_map.get(3, '—'))}%</td>"
+            f"<td>{esc(day_map.get(7, '—'))}%</td>"
+            f"<td>{esc(day_map.get(14, '—'))}%</td>"
+            "</tr>"
+        )
+
+    svg = (f"<svg viewBox='0 0 {w} {h}' width='100%' role='img' aria-label='Fitted forgetting curves'>"
+           + "".join(grid) + "".join(paths) + "</svg>")
+    detail_tbl = (
+        "<table class='mini-tbl'><thead><tr>"
+        "<th>知识点</th><th>半衰期 (90%区间)</th><th>D+1</th><th>D+3</th><th>D+7</th><th>D+14</th>"
+        "</tr></thead><tbody>" + "".join(curve_rows) + "</tbody></table>"
+    )
+    return svg + "<div class='legend'>" + "".join(legend) + "</div>" + detail_tbl
+
+
 def render_dashboard(context: dict) -> str:
     """No scripts, remote requests or embedded raw evidence; escape all text."""
     esc = lambda value: html.escape(str(value), quote=True)
+    units = context["state"]["units"]
+    target_labels = {
+        "comprehension": "理解",
+        "recall": "回忆",
+        "independent": "独立求解",
+        "transfer": "变式迁移",
+        "delayed": "延迟复测",
+        "timed": "限时演练",
+    }
+    task_type_labels = {
+        "correction": ("错因复核", "pill-red"),
+        "review": ("延迟巩固", "pill-amber"),
+        "diagnostic": ("诊断核查", "pill-blue"),
+        "targeted_variant": ("变式迁移", "pill-blue"),
+    }
+
+    practiced_units = [u for u in units.values() if u["mastery_overall"] is not None]
+    unpracticed_units = [u for u in units.values() if u["mastery_overall"] is None]
+    practiced_units.sort(key=lambda u: (-u["attempts"]["total"], u["unit_id"]))
+    unpracticed_units.sort(key=lambda u: u["unit_id"])
+
+    fitted_count = sum(1 for m in context["models"]["memory"].values() if m.get("status") == "fitted_uncalibrated")
+    due_work = context["due_work"]
+    probes = context["diagnostics"]["selected"]
+    mode_badge = "14-Day Demo / 示例轨迹" if context["learner"]["mode"] == "demo" else "Private Vault / 私人档案"
+
+    # Due work cards
+    due_items = []
+    for task in due_work:
+        u_title = units.get(task["unit_id"], {}).get("title") or task["unit_id"]
+        t_label, t_cls = task_type_labels.get(task.get("task_type"), ("待复习", "pill-gray"))
+        mins = task.get("estimated_minutes")
+        min_badge = f"<span class='meta'>{esc(mins)} min</span>" if mins else ""
+        due_items.append(
+            "<div class='item'>"
+            f"<div class='item-top'><span class='pill {t_cls}'>{esc(t_label)}</span>"
+            f"<span class='item-title'>{esc(u_title)}</span>{min_badge}</div>"
+            f"<div class='item-sub'>{esc(task['reason'])}</div>"
+            "</div>"
+        )
+    due_html = "".join(due_items) or "<div class='empty'>今日暂无到期复习任务 / No due items today.</div>"
+
+    # Diagnostic probes cards
+    probe_items = []
+    for p in probes:
+        u_title = units.get(p["unit_id"], {}).get("title") or p["unit_id"]
+        tags = "".join(f"<span class='chip'>{esc(d)}</span>" for d in p.get("distinguishes", []))
+        probe_items.append(
+            "<div class='item'>"
+            f"<div class='item-top'><span class='pill pill-dark'>闭卷探针</span>"
+            f"<span class='item-title'>{esc(u_title)}</span>"
+            f"<span class='meta'>{esc(p.get('estimated_minutes', 3))} min</span></div>"
+            f"<div class='probe-q'>{esc(p['prompt'])}</div>"
+            f"<div class='chips'>{tags}</div>"
+            "</div>"
+        )
+    probe_html = "".join(probe_items) or "<div class='empty'>暂无待核查探针 / No targeted probes queued.</div>"
+
+    # Unit mastery table rows (practiced units with bars first, then unpracticed)
     rows = []
-    for u in context["state"]["units"].values():
-        coverage = u["evidence_coverage"]
-        label = "Unknown / 未知" if u["mastery_overall"] is None else "Heuristic evidence / 启发式证据"
-        rows.append("<tr>" + "".join(f"<td>{esc(x)}</td>" for x in
-                    (u["title"], label, u["attempts"]["total"], ", ".join(coverage["missing_targets"]),
-                     ", ".join(coverage["unverified_targets"]))) + "</tr>")
-    body = render_today(context)
-    return ("<!doctype html><html lang='zh-CN'><meta charset='utf-8'>"
-            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-            "<meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; style-src 'unsafe-inline'\">"
-            "<title>Evidence-based study brief</title><style>"
-            "body{font:16px/1.6 system-ui,sans-serif;background:#f3f5f7;color:#142b3e;max-width:1100px;margin:3rem auto;padding:1rem}"
-            "h1{font-size:2rem}table{border-collapse:collapse;background:white;width:100%}td,th{text-align:left;padding:.8rem;border-bottom:1px solid #dae1e7}"
-            "pre{white-space:pre-wrap;background:white;padding:1.5rem;border-radius:12px}small{color:#506779}</style>"
-            "<h1>Learning evidence / 学习证据</h1><small>"
-            + esc(context["as_of"]) + " · Local report; review before sharing / 本地报告，分享前请检查</small>"
-            "<table><thead><tr><th>Unit / 知识点</th><th>Status / 状态</th><th>Attempts / 作答</th>"
-            "<th>Missing / 缺少</th><th>Unverified / 待核验</th></tr></thead><tbody>"
-            + "".join(rows) + "</tbody></table><h2>Next checks / 下一步核查</h2><pre>"
-            + esc(body) + "</pre></html>")
+    for u in practiced_units:
+        pct = int(round(float(u["mastery_overall"]) * 100))
+        att = u["attempts"]
+        obs = "".join(f"<span class='chip chip-ok'>{esc(target_labels.get(t, t))}</span>"
+                      for t in u["evidence_coverage"]["observed_targets"])
+        rows.append(
+            "<tr>"
+            f"<td><strong>{esc(u['title'])}</strong><div class='sub-id'>{esc(u['subject'])}</div></td>"
+            f"<td><div class='bar-wrap'><div class='bar-track'><div class='bar-fill' style='width:{pct}%'></div></div>"
+            f"<span class='bar-num'>{pct}%</span></div></td>"
+            f"<td><span class='stat-num'>{esc(att['correct'])}/{esc(att['total'])}</span> <span class='muted'>正确</span></td>"
+            f"<td><div class='chips'>{obs or '<span class=\"muted\">—</span>'}</div></td>"
+            "</tr>"
+        )
+    for u in unpracticed_units:
+        missing = "".join(f"<span class='chip'>{esc(target_labels.get(t, t))}</span>"
+                          for t in u["evidence_coverage"]["missing_targets"][:3])
+        rows.append(
+            "<tr class='row-dim'>"
+            f"<td>{esc(u['title'])}<div class='sub-id'>{esc(u['subject'])}</div></td>"
+            "<td><span class='pill pill-gray'>待首次演练 · Unknown / 未知</span></td>"
+            "<td class='muted'>0 次</td>"
+            f"<td><div class='chips'>{missing}</div></td>"
+            "</tr>"
+        )
+
+    memory_svg = _render_memory_svg(context["models"]["memory"], units, esc)
+    as_of_short = str(context["as_of"])[:10]
+
+    return (
+        "<!doctype html><html lang='zh-CN'><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; style-src 'unsafe-inline'\">"
+        "<title>Postgrad Study Engine · Learning Dashboard</title><style>"
+        "*{box-sizing:border-box}"
+        "body{font:14px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;"
+        "background:#F5F6F8;color:#18181B;margin:0;padding:24px}"
+        ".wrap{max-width:1120px;margin:0 auto}"
+        ".header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #E4E4E7}"
+        ".brand{font-size:22px;font-weight:700;letter-spacing:-.02em;color:#111827}"
+        ".brand span{color:#C83E2B}"
+        ".subtitle{font-size:12.5px;color:#6B7280;margin-top:2px}"
+        ".badge-top{background:#1C1C1E;color:#F9FAFB;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:500}"
+        ".kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}"
+        ".kpi{background:#FFF;border:1px solid #E4E4E7;border-radius:12px;padding:14px 16px}"
+        ".kpi-label{font-size:12px;color:#6B7280}"
+        ".kpi-val{font-size:26px;font-weight:700;color:#111827;margin:4px 0 2px}"
+        ".kpi-val.accent{color:#C83E2B}"
+        ".kpi-note{font-size:11.5px;color:#71717A}"
+        ".grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;margin-bottom:16px}"
+        ".card{background:#FFF;border:1px solid #E4E4E7;border-radius:12px;padding:16px 18px}"
+        ".card-title{font-size:15px;font-weight:700;color:#111827;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center}"
+        ".card-title small{font-size:11.5px;font-weight:400;color:#6B7280}"
+        ".legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:12px}"
+        ".leg-item{display:flex;align-items:center;gap:6px}"
+        ".dot{width:9px;height:9px;border-radius:50%;display:inline-block}"
+        ".item{padding:10px 12px;border:1px solid #F0F0F2;background:#FAFAFB;border-radius:9px;margin-bottom:9px}"
+        ".item:last-child{margin-bottom:0}"
+        ".item-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}"
+        ".item-title{font-weight:600;color:#111827;font-size:13.5px}"
+        ".item-sub{font-size:12px;color:#6B7280;margin-top:4px}"
+        ".probe-q{font-size:13px;color:#1F2937;margin:6px 0;font-weight:500}"
+        ".meta{margin-left:auto;font-size:11.5px;color:#6B7280;background:#FFF;border:1px solid #E4E4E7;padding:1px 7px;border-radius:999px}"
+        ".pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:600}"
+        ".pill-red{background:#FEE2E2;color:#B91C1C}"
+        ".pill-amber{background:#FEF3C7;color:#B45309}"
+        ".pill-blue{background:#DBEAFE;color:#1D4ED8}"
+        ".pill-dark{background:#1C1C1E;color:#F9FAFB}"
+        ".pill-gray{background:#F4F4F5;color:#52525B;font-weight:500}"
+        ".chips{display:flex;flex-wrap:wrap;gap:5px}"
+        ".chip{font-size:11px;padding:2px 7px;border-radius:6px;background:#F4F4F5;color:#52525B}"
+        ".chip-ok{background:#ECFDF5;color:#047857}"
+        "table{width:100%;border-collapse:collapse;font-size:13px}"
+        "th{text-align:left;font-size:12px;color:#6B7280;font-weight:600;padding:7px 10px;border-bottom:1px solid #E4E4E7}"
+        "td{padding:7px 10px;border-bottom:1px solid #F4F4F5;vertical-align:middle}"
+        ".mini-tbl{margin-top:14px;font-size:12px;border-top:1px solid #F0F0F2}"
+        ".mini-tbl th{font-size:11px;padding:7px 6px}"
+        ".mini-tbl td{padding:7px 6px}"
+        "tr:last-child td{border-bottom:none}"
+        ".row-dim td{color:#52525B}"
+        ".sub-id{font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.04em}"
+        ".bar-wrap{display:flex;align-items:center;gap:8px}"
+        ".bar-track{width:110px;height:7px;background:#E5E7EB;border-radius:999px;overflow:hidden}"
+        ".bar-fill{height:100%;background:linear-gradient(90deg,#C83E2B,#E05A47);border-radius:999px}"
+        ".bar-num{font-weight:700;font-size:12.5px;color:#111827}"
+        ".stat-num{font-weight:600;color:#111827}"
+        ".muted{color:#71717A;font-size:12px}"
+        ".empty{color:#71717A;font-size:13px;padding:12px 0}"
+        ".footer{margin-top:12px;font-size:11.5px;color:#71717A;display:flex;justify-content:space-between}"
+        "</style><div class='wrap'>"
+        "<div class='header'><div>"
+        "<div class='brand'>Postgrad Study Engine <span>·</span> 学习记忆仪表盘</div>"
+        f"<div class='subtitle'>Long-term Memory · Half-Life / FSRS Recall · Targeted Probes &nbsp;|&nbsp; As of {esc(as_of_short)}</div>"
+        f"</div><div class='badge-top'>{esc(mode_badge)}</div></div>"
+        "<div class='kpis'>"
+        f"<div class='kpi'><div class='kpi-label'>累计学习事件 · Events</div><div class='kpi-val'>{esc(context['state']['event_count'])}</div><div class='kpi-note'>Append-only 可追溯账本</div></div>"
+        f"<div class='kpi'><div class='kpi-label'>今日到期复习 · Due Today</div><div class='kpi-val accent'>{esc(len(due_work))}</div><div class='kpi-note'>错因复核与延迟巩固队列</div></div>"
+        f"<div class='kpi'><div class='kpi-label'>遗忘曲线拟合 · Memory Fit</div><div class='kpi-val'>{esc(fitted_count)}</div><div class='kpi-note'>半衰期 / FSRS 个人记忆模型</div></div>"
+        f"<div class='kpi'><div class='kpi-label'>课程知识点 · Units</div><div class='kpi-val'>{esc(len(units))}</div><div class='kpi-note'>已演练 {esc(len(practiced_units))} · 待首次覆盖 {esc(len(unpracticed_units))}</div></div>"
+        "</div>"
+        "<div class='grid2'>"
+        "<div class='card'><div class='card-title'>个人遗忘曲线拟合 · Fitted Forgetting Curves<small>D+1 / D+3 / D+7 / D+14 留存率预测</small></div>"
+        + memory_svg +
+        "</div>"
+        "<div class='card'><div class='card-title'>AI 私教闭卷探针 · Targeted Probes<small>精准定位卡点</small></div>"
+        + probe_html +
+        "<div class='card-title' style='margin-top:14px'>今日优先复习队列 · Due Work</div>"
+        + due_html +
+        "</div></div>"
+        "<div class='card'><div class='card-title'>知识点掌握与覆盖总览 · Knowledge Units<small>严格区分独立求解与提示完成</small></div>"
+        "<table><thead><tr><th>知识点 / Unit</th><th>掌握度估计 / Mastery</th><th>作答记录 / Attempts</th><th>已覆盖 / 待补齐维度</th></tr></thead><tbody>"
+        + "".join(rows) +
+        "</tbody></table></div>"
+        "<div class='footer'><span>Postgrad Study Engine · Zero-Dependency Local Report</span>"
+        "<span>Heuristic estimates &amp; uncalibrated recall curves for study guidance</span></div>"
+        "</div></html>"
+    )
