@@ -1,0 +1,480 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://postgrad-study-engine.local/proposals/process-observation-draft-0.1.schema.json",
+  "title": "PROPOSED process observation; not accepted by the current Core",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.1"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_type": {
+      "const": "process_observation"
+    },
+    "subject": {
+      "enum": [
+        "math",
+        "english",
+        "materials",
+        "politics",
+        "physical_chemistry",
+        "math_contest"
+      ]
+    },
+    "unit_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"
+      },
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trace_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "anchor_event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "question_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "observed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "capture_mode": {
+          "enum": [
+            "ordinary",
+            "diagnostic"
+          ]
+        },
+        "scope": {
+          "enum": [
+            "local_steps",
+            "complete_attempt",
+            "reported_outcome"
+          ]
+        },
+        "order_basis": {
+          "enum": [
+            "observed_sequence",
+            "retrospective_sequence",
+            "unknown"
+          ]
+        },
+        "relevant_prior_exposure": {
+          "enum": [
+            "none_known",
+            "known",
+            "unknown"
+          ]
+        },
+        "exposure_event_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "minItems": 0,
+          "maxItems": 16,
+          "uniqueItems": true
+        },
+        "question_familiarity": {
+          "enum": [
+            "novel",
+            "familiar",
+            "unknown"
+          ]
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "problem_family_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "collector_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "coding_policy_version": {
+          "const": "thinking-coding-draft-0.1"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "step_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "kind": {
+                "enum": [
+                  "representation",
+                  "method_choice",
+                  "key_derivation",
+                  "first_divergence",
+                  "self_detection",
+                  "strategy_change",
+                  "resume_after_hint",
+                  "check",
+                  "reconstruction",
+                  "transfer",
+                  "retention"
+                ]
+              },
+              "unit_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"
+                },
+                "minItems": 1,
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "source": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "learner_work",
+                      "concurrent_self_report",
+                      "retrospective_self_report",
+                      "system_inference",
+                      "unsupported_hypothesis",
+                      "legacy_summary"
+                    ]
+                  },
+                  "ref": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "locator": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "representation": {
+                    "enum": [
+                      "excerpt",
+                      "faithful_summary"
+                    ]
+                  },
+                  "uncertainty": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "minItems": 0,
+                    "maxItems": 8
+                  }
+                },
+                "required": [
+                  "kind",
+                  "ref",
+                  "representation",
+                  "uncertainty"
+                ]
+              },
+              "dimensions": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "problem_representation",
+                    "method_entry",
+                    "causal_reasoning",
+                    "abstraction",
+                    "derivation_completeness",
+                    "strategy_adjustment",
+                    "error_monitoring",
+                    "independent_reconstruction",
+                    "transfer",
+                    "learning_efficiency"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 3,
+                "uniqueItems": true
+              },
+              "elicitation": {
+                "enum": [
+                  "spontaneous",
+                  "neutral_prompt",
+                  "explanation_prompt",
+                  "instructional_hint",
+                  "unknown"
+                ]
+              },
+              "assistance_level": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 5
+              },
+              "intervention_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "basis_event_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "minItems": 0,
+                "maxItems": 16,
+                "uniqueItems": true
+              },
+              "verification": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "unverified",
+                      "source_checked",
+                      "learner_report_confirmed",
+                      "behavior_supported",
+                      "contradicted"
+                    ]
+                  },
+                  "evidence_event_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "minItems": 0,
+                    "maxItems": 16,
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "status",
+                  "evidence_event_ids"
+                ]
+              }
+            },
+            "required": [
+              "step_id",
+              "kind",
+              "unit_ids",
+              "evidence",
+              "source",
+              "dimensions",
+              "elicitation",
+              "assistance_level",
+              "basis_event_ids",
+              "verification"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "interventions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "intervention_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "kind": {
+                "enum": [
+                  "neutral_prompt",
+                  "explanation_request",
+                  "condition_cue",
+                  "subproblem",
+                  "partial_route",
+                  "worked_solution"
+                ]
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "before_step_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              }
+            },
+            "required": [
+              "intervention_id",
+              "kind",
+              "level",
+              "summary"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 8
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "relation": {
+                "enum": [
+                  "continues",
+                  "tests_diagnosis",
+                  "retest_of",
+                  "transfer_from",
+                  "contradicts"
+                ]
+              },
+              "target_event_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "unit_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$"
+                },
+                "minItems": 1,
+                "maxItems": 8,
+                "uniqueItems": true
+              },
+              "status": {
+                "enum": [
+                  "proposed",
+                  "verified"
+                ]
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "transfer_distance": {
+                "enum": [
+                  "isomorphic",
+                  "near",
+                  "far_candidate",
+                  "far_reviewed",
+                  "unknown"
+                ]
+              },
+              "changed_features": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "representation",
+                    "method_selection",
+                    "principle",
+                    "domain",
+                    "context",
+                    "modality"
+                  ]
+                },
+                "minItems": 0,
+                "maxItems": 6,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "relation",
+              "target_event_id",
+              "unit_ids",
+              "status",
+              "basis"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 8
+        },
+        "supersedes_event_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "trace_id",
+        "anchor_event_id",
+        "question_id",
+        "observed_at",
+        "capture_mode",
+        "scope",
+        "order_basis",
+        "relevant_prior_exposure",
+        "exposure_event_ids",
+        "question_familiarity",
+        "collector_version",
+        "coding_policy_version",
+        "steps",
+        "interventions",
+        "links"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "timestamp",
+    "event_type",
+    "subject",
+    "unit_ids",
+    "observation"
+  ]
+}
