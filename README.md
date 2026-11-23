@@ -17,7 +17,7 @@
 [![Code: MIT](https://img.shields.io/badge/Code-MIT-2E7D32?style=flat-square&labelColor=1C1C1E)](LICENSE)
 [![Docs: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-555555?style=flat-square&labelColor=1C1C1E)](LICENSE-DOCS-CC-BY-4.0)
 
-**简体中文** · [English](README.en.md) · [Colab 在线体验](https://colab.research.google.com/github/wysking/postgrad-study-engine/blob/main/demo.ipynb) · [完整架构与技术文档](docs/ARCHITECTURE_OVERVIEW.md) · [首次接入](docs/GETTING_STARTED.md) · [贡献指南](CONTRIBUTING.md)
+**简体中文** · [English](README.en.md) · [Colab 在线体验](https://colab.research.google.com/github/wysking/postgrad-study-engine/blob/main/demo.ipynb) · [双 AI 接入（Gemini / ChatGPT）](docs/AI_INTEGRATIONS.md) · [架构与技术文档](docs/ARCHITECTURE_OVERVIEW.md) · [贡献指南](CONTRIBUTING.md)
 
 </div>
 
@@ -58,10 +58,42 @@ python -m scripts.study demo --vault ../study-demo
 
 ---
 
+## 🔌 两套开箱即用的云端 AI 接入方案（Gemini & ChatGPT / Codex）
+
+同一份私有 Git 记忆账本，同时提供 **Gemini** 与 **ChatGPT / Codex** 两套完整云端接入蓝图，换模型不断档、记忆永久归你：
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🌐 方案 A：Gemini 原生全谷歌桥接（零远程 MCP）</h3>
+      <p><b>Google Drive 只读镜像 + Gmail 草稿 + Google Apps Script V8 → GitHub Actions</b></p>
+      <ul>
+        <li>复用 Google AI Pro 原生 Gemini 聊天与 02:00 定时复盘，<b>零付费 API</b></li>
+        <li>彻底告别易断连的第三方远程 GitHub MCP，零 GCP 绑卡、零公网 <code>doPost</code></li>
+        <li>内置 Drive v3 原地快写（大文档不超时）、单仓 Fine-Grained PAT、本地 Schema 校验与 11 项 Node.js 测试</li>
+      </ul>
+      <p>👉 <a href="integrations/google-native-bridge/"><b>直接复制全套桥接代码与提示词 →</b></a></p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🤖 方案 B：ChatGPT / OpenAI / Codex 直连接入</h3>
+      <p><b>ChatGPT（GitHub 连接器 / Scheduled）· Codex CLI → GitHub Actions</b></p>
+      <ul>
+        <li>直接加载仓库内置私教 Skill，通过结构化 <code>inbox/&lt;request_id&gt;.json</code> 归档并核验同 ID <code>outbox</code> 回执</li>
+        <li>支持配置每日定时 GPT 定性复盘任务，自动串联同题多轮记录并更新 <code>analysis/learner_context.md</code></li>
+        <li>同样兼容纯本地 CLI（<code>python -m scripts.study</code>），离线可用</li>
+      </ul>
+      <p>👉 <a href="docs/AI_INTEGRATIONS.md"><b>查看双生态完整对比与接入指南 →</b></a></p>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 📚 深入了解与文档导航
 
-完整技术细节、三层记忆架构、四步工作流与 FAQ 已全部收录在 `docs/` 目录中：
+完整技术细节、双生态接入代码、三层记忆架构与 FAQ 已全部收录在 `docs/` 与 `integrations/` 目录中：
 
+- **[双生态 AI 接入方案（Gemini + ChatGPT / Codex）](docs/AI_INTEGRATIONS.md)** · **[Google 原生桥接源码与一键部署包](integrations/google-native-bridge/)**
 - **[架构与技术详述（原首页完整技术内容）](docs/ARCHITECTURE_OVERVIEW.md)**：四步闭环流程图、三层数据职责、v0.5.1 能力矩阵与完整 FAQ
 - **[首次接入指南](docs/GETTING_STARTED.md)**：3 分钟初始化空白私有 Vault 与本地 CLI 常用命令
 - **[日常使用与云端定期复盘](docs/EVERYDAY_LEARNING.md)**：接入日常 AI 对话、夜间自动复盘与 `learner_context.md` 画像更新

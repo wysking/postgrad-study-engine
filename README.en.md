@@ -17,7 +17,7 @@
 [![Code: MIT](https://img.shields.io/badge/Code-MIT-2E7D32?style=flat-square&labelColor=1C1C1E)](LICENSE)
 [![Docs: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-555555?style=flat-square&labelColor=1C1C1E)](LICENSE-DOCS-CC-BY-4.0)
 
-[简体中文](README.md) · **English** · [Run in Colab](https://colab.research.google.com/github/wysking/postgrad-study-engine/blob/main/demo.ipynb) · [Architecture & Technical Overview](docs/ARCHITECTURE_OVERVIEW.md#english-technical-overview) · [Getting Started](docs/GETTING_STARTED.md) · [Contributing](CONTRIBUTING.md)
+[简体中文](README.md) · **English** · [Run in Colab](https://colab.research.google.com/github/wysking/postgrad-study-engine/blob/main/demo.ipynb) · [Dual AI Setup (Gemini / ChatGPT)](docs/AI_INTEGRATIONS.md#english-dual-ai-integration-guide) · [Architecture](docs/ARCHITECTURE_OVERVIEW.md#english-technical-overview) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -58,10 +58,42 @@ Open `../study-demo/reports/demo.html` to view the full report shown above (runs
 
 ---
 
+## 🔌 Two Ready-to-Deploy AI Integrations (Gemini & ChatGPT / Codex)
+
+Because your memory lives in your own private Git Vault (`Schema 1.0`), you can connect **Gemini**, **ChatGPT / Codex**, or **both** without ever losing your study history:
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🌐 Track A: Gemini Google-Native Bridge (Zero Remote MCP)</h3>
+      <p><b>Google Drive Mirrors + Gmail Drafts + Apps Script V8 → GitHub Actions</b></p>
+      <ul>
+        <li>Works with native Gemini chat &amp; scheduled actions — <b>zero paid LLM API</b></li>
+        <li>No fragile third-party remote GitHub MCP, no GCP billing, no public <code>doPost</code> Web App</li>
+        <li>Includes Drive API v3 fast in-place updates, single-repo PAT, local schema validation, and Node.js unit tests</li>
+      </ul>
+      <p>👉 <a href="integrations/google-native-bridge/"><b>Copy the full bridge code &amp; prompts →</b></a></p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🤖 Track B: ChatGPT / OpenAI / Codex Integration</h3>
+      <p><b>ChatGPT (GitHub Connector / Scheduled) · Codex CLI → GitHub Actions</b></p>
+      <ul>
+        <li>Load the built-in <code>skills/study-tutor/SKILL.md</code> to write structured <code>inbox/&lt;request_id&gt;.json</code> requests and verify exact <code>outbox</code> receipts</li>
+        <li>Schedule periodic qualitative reviews that refresh <code>analysis/learner_context.md</code> across multi-turn derivations</li>
+        <li>Also works offline via pure local Python CLI (<code>python -m scripts.study</code>)</li>
+      </ul>
+      <p>👉 <a href="docs/AI_INTEGRATIONS.md#english-dual-ai-integration-guide"><b>Compare both integration tracks →</b></a></p>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 📚 Documentation & Technical Deep Dive
 
-All architectural details, three-layer memory contracts, and FAQs live in `docs/`:
+All architectural details, dual-AI integration templates, three-layer memory contracts, and FAQs live in `docs/` and `integrations/`:
 
+- **[Dual AI Integrations (Gemini & ChatGPT / Codex)](docs/AI_INTEGRATIONS.md#english-dual-ai-integration-guide)** · **[Copy-Paste Google-Native Bridge](integrations/google-native-bridge/)**
 - **[Architecture & Technical Overview](docs/ARCHITECTURE_OVERVIEW.md#english-technical-overview)**: Complete 4-step workflow, 3-layer memory breakdown, v0.5.1 capability matrix, and FAQ
 - **[First-Time Setup Guide](docs/GETTING_STARTED.md)**: Initialize a blank private Vault and run local CLI commands
 - **[Everyday Learning & Periodic Review](docs/EVERYDAY_LEARNING.md#english-setup-guide)**: Connect daily AI tutoring sessions with scheduled qualitative reviews
