@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone, tzinfo
 import html
 import json
 import os
@@ -17,6 +17,12 @@ DEFAULT_TZ = "Asia/Shanghai"
 ROLLOVER_HOUR = 4
 CORE_DEF_RE = re.compile(r'<div class="core-def">(.*?)</div>', re.DOTALL)
 TAG_RE = re.compile(r"<[^>]+>")
+
+
+def resolve_tz(tz_name: str) -> tzinfo:
+    if tz_name in ("Asia/Shanghai", "UTC+8", "+08:00"):
+        return timezone(timedelta(hours=8))
+    return ZoneInfo(tz_name)
 
 
 def strip_html(raw: str) -> str:
@@ -34,13 +40,13 @@ def extract_word_and_def(flds: str) -> tuple[str, str]:
     return word, short_def
 
 
-def study_day_bounds(target_day: date, tz: ZoneInfo) -> tuple[int, int]:
+def study_day_bounds(target_day: date, tz: tzinfo) -> tuple[int, int]:
     start_dt = datetime.combine(target_day, time(ROLLOVER_HOUR, 0), tzinfo=tz)
     end_dt = start_dt + timedelta(days=1)
     return int(start_dt.timestamp() * 1000), int(end_dt.timestamp() * 1000)
 
 
-def default_study_day(tz: ZoneInfo, now: datetime | None = None) -> date:
+def default_study_day(tz: tzinfo, now: datetime | None = None) -> date:
     current = (now or datetime.now(tz)).astimezone(tz)
     return (current - timedelta(hours=ROLLOVER_HOUR)).date()
 
@@ -67,7 +73,7 @@ def download_ankiweb_collection(dest_col: Path, hkey: str, endpoint: str | None 
         col.close()
 
 
-def summarize_collection(col_path: Path, target_day: date, tz: ZoneInfo) -> dict | None:
+def summarize_collection(col_path: Path, target_day: date, tz: tzinfo) -> dict | None:
     start_ms, end_ms = study_day_bounds(target_day, tz)
     conn = sqlite3.connect(f"file:{col_path.as_posix()}?mode=ro", uri=True)
     try:
@@ -177,7 +183,7 @@ def sync_to_inbox(
     col_path: Path | None = None,
     now: datetime | None = None,
 ) -> Path | None:
-    tz = ZoneInfo(tz_name)
+    tz = resolve_tz(tz_name)
     if col_path is not None:
         stats = summarize_collection(col_path, target_day, tz)
     else:
@@ -230,7 +236,7 @@ def main() -> int:
     parser.add_argument("--github-output", type=Path, default=None)
     args = parser.parse_args()
 
-    tz = ZoneInfo(args.tz)
+    tz = resolve_tz(args.tz)
     target_day = date.fromisoformat(args.date) if args.date else default_study_day(tz)
     written = sync_to_inbox(
         args.vault_root.resolve(),

@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 import importlib.util
 import json
 from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
-from zoneinfo import ZoneInfo
 
 from scripts import contracts, process_inbox
 
@@ -22,7 +21,7 @@ SPEC.loader.exec_module(ankiweb_sync)
 
 class AnkiWebSyncIntegrationTests(unittest.TestCase):
     def test_sync_extracts_stubborn_words_ignores_private_hook_and_validates(self):
-        tz = ZoneInfo("Asia/Shanghai")
+        tz = timezone(timedelta(hours=8))
         with tempfile.TemporaryDirectory(prefix="core-anki-sync-") as tmp:
             root = Path(tmp)
             for sub in ("inbox", "outbox", "config"):
