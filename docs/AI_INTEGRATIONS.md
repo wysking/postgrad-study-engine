@@ -50,6 +50,7 @@ flowchart LR
 3. **[`integrations/google-native-bridge/GEMINI_TUTOR_SKILL.md`](../integrations/google-native-bridge/GEMINI_TUTOR_SKILL.md)**：日常辅导 Skill / Gem 指令模板。
 4. **[`integrations/google-native-bridge/GEMINI_DAILY_REVIEW_PROMPT.md`](../integrations/google-native-bridge/GEMINI_DAILY_REVIEW_PROMPT.md)**：每日 02:00 定性复盘定时任务提示词模板。
 5. **[`integrations/google-native-bridge/README.md`](../integrations/google-native-bridge/README.md)**：5 分钟保姆级点击部署清单。
+6. **[`integrations/ankiweb-sync/`](../integrations/ankiweb-sync/)（可选词汇伴随同步）**：手机端 `AnkiDroid + FSRS` 高频刷词，每晚 `01:00` 由 GitHub Actions 单向只读拉取复习统计与顽固易忘词（自动忽略私人助记字段）写入 `inbox/`，与方案 A / B 共享同一账本。
 
 ---
 
@@ -91,3 +92,5 @@ Because **Postgrad Study Engine** separates the public Core from your private Gi
    - Connect Codex or ChatGPT (with GitHub connector + Scheduled tasks) directly to your private Vault's `inbox/<request_id>.json` workflow and `analysis/learner_context.md` qualitative review loop.
 3. **Track C — Pure Local CLI ([`docs/GETTING_STARTED.md`](GETTING_STARTED.md))**
    - Run `python -m scripts.study` offline with Python 3.12 standard library only.
+4. **Optional Companion — AnkiWeb Read-Only Vocabulary Sync ([`integrations/ankiweb-sync/`](../integrations/ankiweb-sync/))**
+   - Pulls daily `AnkiDroid + FSRS` review counts and stubborn words (`upload=False`, stripping private mnemonic fields) into `inbox/` before nightly AI review.
