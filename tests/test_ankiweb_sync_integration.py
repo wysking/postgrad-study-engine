@@ -71,6 +71,38 @@ class AnkiWebSyncIntegrationTests(unittest.TestCase):
             receipt = process_inbox.process_file(root, req_path)
             self.assertEqual(receipt["status"], "succeeded", receipt)
 
+    def test_delayed_cron_after_rollover_still_backfills_previous_study_day(self):
+        tz = timezone(timedelta(hours=8))
+        delayed_now = datetime(2026, 11, 26, 8, 47, tzinfo=tz)
+        days = ankiweb_sync.default_study_days(tz, now=delayed_now, lookback_days=2)
+        self.assertEqual(days, [date(2026, 11, 25), date(2026, 11, 26)])
+
+        with tempfile.TemporaryDirectory(prefix="core-anki-delay-") as tmp:
+            root = Path(tmp)
+            (root / "inbox").mkdir()
+            db_path = root / "sample.anki2"
+            conn = sqlite3.connect(db_path)
+            conn.executescript(
+                """
+                CREATE TABLE notes (id INTEGER PRIMARY KEY, flds TEXT);
+                CREATE TABLE cards (id INTEGER PRIMARY KEY, nid INTEGER, lapses INTEGER, flags INTEGER);
+                CREATE TABLE revlog (id INTEGER PRIMARY KEY, cid INTEGER, ease INTEGER, time INTEGER, type INTEGER);
+                """
+            )
+            conn.execute(
+                "INSERT INTO notes VALUES (1, ?)",
+                ('cognitive\x1f<div class="core-def">认知的</div>\x1fPRIVATE_HOOK',),
+            )
+            conn.execute("INSERT INTO cards VALUES (11, 1, 1, 0)")
+            ts_prev = int(datetime(2026, 11, 25, 21, 30, tzinfo=tz).timestamp() * 1000)
+            conn.execute("INSERT INTO revlog VALUES (?, 11, 3, 5000, 0)", (ts_prev,))
+            conn.commit()
+            conn.close()
+
+            written = ankiweb_sync.sync_days_to_inbox(root, days, col_path=db_path, now=delayed_now)
+            self.assertEqual([p.name for p in written], ["anki-20261125-english-vocab-001.json"])
+            self.assertEqual(ankiweb_sync.sync_days_to_inbox(root, days, col_path=db_path, now=delayed_now), [])
+
 
 if __name__ == "__main__":
     unittest.main()

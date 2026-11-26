@@ -51,6 +51,12 @@ def default_study_day(tz: tzinfo, now: datetime | None = None) -> date:
     return (current - timedelta(hours=ROLLOVER_HOUR)).date()
 
 
+def default_study_days(tz: tzinfo, now: datetime | None = None, lookback_days: int = 2) -> list[date]:
+    days = max(1, int(lookback_days))
+    latest = default_study_day(tz, now=now)
+    return [latest - timedelta(days=offset) for offset in range(days - 1, -1, -1)]
+
+
 def download_ankiweb_collection(dest_col: Path, hkey: str, endpoint: str | None = None) -> None:
     from anki.collection import Collection
     from anki.sync_pb2 import SyncAuth, SyncCollectionResponse
@@ -173,29 +179,17 @@ def next_request_path(inbox_dir: Path, target_day: date, subject_label: str, tot
     return inbox_dir / f"{prefix}{len(existing) + 1:03d}.json"
 
 
-def sync_to_inbox(
+def _write_day_request(
     vault_root: Path,
+    col_path: Path,
     target_day: date,
     *,
-    subject_label: str = "english",
-    source_ref: str = "AnkiDroid / FSRS",
-    tz_name: str = DEFAULT_TZ,
-    col_path: Path | None = None,
-    now: datetime | None = None,
+    subject_label: str,
+    source_ref: str,
+    tz: tzinfo,
+    now: datetime | None,
 ) -> Path | None:
-    tz = resolve_tz(tz_name)
-    if col_path is not None:
-        stats = summarize_collection(col_path, target_day, tz)
-    else:
-        hkey = os.environ.get("ANKI_SYNC_HKEY", "").strip()
-        if not hkey:
-            return None
-        endpoint = os.environ.get("ANKI_SYNC_ENDPOINT", "").strip() or None
-        with tempfile.TemporaryDirectory(prefix="anki-readonly-") as tmp:
-            temp_col = Path(tmp) / "collection.anki2"
-            download_ankiweb_collection(temp_col, hkey=hkey, endpoint=endpoint)
-            stats = summarize_collection(temp_col, target_day, tz)
-
+    stats = summarize_collection(col_path, target_day, tz)
     if stats is None:
         return None
 
@@ -225,10 +219,84 @@ def sync_to_inbox(
     return req_path
 
 
+def sync_days_to_inbox(
+    vault_root: Path,
+    target_days: list[date],
+    *,
+    subject_label: str = "english",
+    source_ref: str = "AnkiDroid / FSRS",
+    tz_name: str = DEFAULT_TZ,
+    col_path: Path | None = None,
+    now: datetime | None = None,
+) -> list[Path]:
+    if not target_days:
+        return []
+    tz = resolve_tz(tz_name)
+    written: list[Path] = []
+    if col_path is not None:
+        for target_day in target_days:
+            req_path = _write_day_request(
+                vault_root,
+                col_path,
+                target_day,
+                subject_label=subject_label,
+                source_ref=source_ref,
+                tz=tz,
+                now=now,
+            )
+            if req_path is not None:
+                written.append(req_path)
+        return written
+
+    hkey = os.environ.get("ANKI_SYNC_HKEY", "").strip()
+    if not hkey:
+        return []
+    endpoint = os.environ.get("ANKI_SYNC_ENDPOINT", "").strip() or None
+    with tempfile.TemporaryDirectory(prefix="anki-readonly-") as tmp:
+        temp_col = Path(tmp) / "collection.anki2"
+        download_ankiweb_collection(temp_col, hkey=hkey, endpoint=endpoint)
+        for target_day in target_days:
+            req_path = _write_day_request(
+                vault_root,
+                temp_col,
+                target_day,
+                subject_label=subject_label,
+                source_ref=source_ref,
+                tz=tz,
+                now=now,
+            )
+            if req_path is not None:
+                written.append(req_path)
+    return written
+
+
+def sync_to_inbox(
+    vault_root: Path,
+    target_day: date,
+    *,
+    subject_label: str = "english",
+    source_ref: str = "AnkiDroid / FSRS",
+    tz_name: str = DEFAULT_TZ,
+    col_path: Path | None = None,
+    now: datetime | None = None,
+) -> Path | None:
+    written = sync_days_to_inbox(
+        vault_root,
+        [target_day],
+        subject_label=subject_label,
+        source_ref=source_ref,
+        tz_name=tz_name,
+        col_path=col_path,
+        now=now,
+    )
+    return written[0] if written else None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--vault-root", type=Path, default=Path.cwd())
     parser.add_argument("--date", type=str, default=None)
+    parser.add_argument("--lookback-days", type=int, default=2)
     parser.add_argument("--subject-label", type=str, default="english")
     parser.add_argument("--source-ref", type=str, default="AnkiDroid / FSRS")
     parser.add_argument("--tz", type=str, default=DEFAULT_TZ)
@@ -237,19 +305,23 @@ def main() -> int:
     args = parser.parse_args()
 
     tz = resolve_tz(args.tz)
-    target_day = date.fromisoformat(args.date) if args.date else default_study_day(tz)
-    written = sync_to_inbox(
-        args.vault_root.resolve(),
-        target_day=target_day,
+    vault_root = args.vault_root.resolve()
+    target_days = [date.fromisoformat(args.date)] if args.date else default_study_days(tz, lookback_days=args.lookback_days)
+    written = sync_days_to_inbox(
+        vault_root,
+        target_days=target_days,
         subject_label=args.subject_label,
         source_ref=args.source_ref,
         tz_name=args.tz,
         col_path=args.col_path,
     )
     if args.github_output:
-        rel = written.relative_to(args.vault_root.resolve()).as_posix() if written else ""
+        rels = [p.relative_to(vault_root).as_posix() for p in written]
+        first = rels[0] if rels else ""
         with args.github_output.open("a", encoding="utf-8") as fh:
-            fh.write(f"inbox_path={rel}\n")
+            fh.write(f"inbox_path={first}\n")
+            fh.write(f"inbox_paths={' '.join(rels)}\n")
+            fh.write(f"inbox_count={len(rels)}\n")
     return 0
 
 

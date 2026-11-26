@@ -6,7 +6,7 @@ Let **AnkiDroid (FSRS)** handle high-frequency flashcard scheduling on your phon
 
 ## 设计要点 · Key Design Principles
 
-1. **单向只读拉取（`upload=False`）**：GitHub Actions 每晚 `01:00`（错峰在 `02:00` AI 每日复盘前）在临时目录拉取一次 AnkiWeb 最新进度，**绝不向 AnkiWeb 回写**，零可能覆盖手机端复习状态。
+1. **单向只读拉取（`upload=False`）**：GitHub Actions 在夜间避开整点拥堵（例如 `23:37` 与 `00:43`，均早于 `02:00` AI 每日复盘）在临时目录拉取一次 AnkiWeb 最新进度，并默认回看最近 2 个学习日（即使 Actions 调度延迟跨过 `04:00` 换日线也不会漏掉前一晚复习）；**绝不向 AnkiWeb 回写**，零可能覆盖手机端复习状态。
 2. **三栏模板字段隔离（`Word | Exam_Meaning | Private_Hook`）**：
    - 脚本仅读取第 0 栏（`Word`）与第 1 栏（`Exam_Meaning` 核心释义），自然忽略第 2 栏（`Private_Hook` 个人自由联想/重口谐音助记），跑完即删临时 `.anki2` 文件——既防敏感词触发云端大模型安全过滤，也不让大体积牌组二进制进 Git。
 3. **无复习零打扰 & 幂等防重**：当天 `revlog` 无点击直接静默退出；同一天相同点击数重复运行自动跳过，不产生重复 `inbox/` 提交。
